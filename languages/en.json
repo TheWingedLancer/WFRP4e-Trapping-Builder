@@ -1,0 +1,57 @@
+{
+  "TRAPPING_BUILDER": {
+    "Title": "Universal Trapping Builder",
+    "Description": "Describe an item in plain English and the AI will generate a fully functional WFRP4e trapping with effects.",
+    "InputPlaceholder": "e.g. \"Potion of Bull's Strength: +20 Strength for 3 rounds\" or \"Enchanted Shield: +10 WS when parrying, adds 1 AP to all locations\"",
+    "Generate": "Generate Trapping",
+    "Generating": "Generating…",
+    "CreateItem": "Create Item",
+    "AddToActor": "Add to Actor",
+    "Reset": "Reset",
+    "Preview": "Preview",
+    "ItemName": "Item Name",
+    "ItemType": "Item Type",
+    "Effects": "Effects",
+    "NoEffects": "No effects generated.",
+    "ApiKeyMissing": "Claude API key not configured. Go to Module Settings → Trapping Builder → API Key.",
+    "ApiError": "AI generation failed. Check your API key and try again.",
+    "Success": "Trapping created successfully!",
+    "Settings": {
+      "ApiKey": {
+        "Name": "Claude API Key",
+        "Hint": "Your Anthropic API key for AI-powered item generation. Get one at console.anthropic.com."
+      },
+      "Model": {
+        "Name": "Claude Model",
+        "Hint": "Which Claude model to use for parsing."
+      },
+      "DefaultItemType": {
+        "Name": "Default Item Type",
+        "Hint": "Default item type when creating trappings."
+      }
+    },
+    "Types": {
+      "trapping": "Trapping",
+      "weapon": "Weapon",
+      "armour": "Armour",
+      "ammunition": "Ammunition",
+      "container": "Container",
+      "money": "Money",
+      "cargo": "Cargo"
+    },
+    "EffectTypes": {
+      "characteristic": "Characteristic Modifier",
+      "skill": "Skill Bonus",
+      "slBonus": "SL Bonus",
+      "condition": "Condition",
+      "healing": "Healing",
+      "movement": "Movement",
+      "fate": "Fate",
+      "fortune": "Fortune",
+      "resilience": "Resilience",
+      "resolve": "Resolve",
+      "advantage": "Advantage",
+      "custom": "Custom Script"
+    }
+  }
+}
