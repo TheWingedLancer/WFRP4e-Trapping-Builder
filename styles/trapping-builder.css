@@ -1,11 +1,11 @@
 /* ==========================================================================
    WFRP4e Universal Trapping Builder – Stylesheet
-   Aesthetic: weathered parchment + dark UI accents to match WFRP4e sheets
+   Inherits WFRP4e system theme (warhammer, wfrp4e, classic-font classes).
+   Only defines layout and module-specific styling.
    ========================================================================== */
 
 /* ----- Inject button in Items sidebar directory ----- */
 .trapping-builder-btn {
-  /* Inherit the same base styles as other sidebar action buttons */
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -20,12 +20,8 @@
   color: #b8860b;
 }
 
-/* ----- Application window ----- */
-.trapping-builder-app {
-  font-family: "Crimson Pro", "Crimson Text", Georgia, serif;
-}
-
-.trapping-builder-body {
+/* ----- Application layout ----- */
+.trapping-builder-app .trapping-builder-body {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -33,62 +29,41 @@
 }
 
 /* ----- Input Section ----- */
-.tb-label {
+.trapping-builder-app .tb-label {
   display: block;
-  font-size: 14px;
   font-weight: 700;
-  color: #2a1506;
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
 
-.tb-label i {
+.trapping-builder-app .tb-label i {
   margin-right: 4px;
-  color: #8b1a1a;
 }
 
-.tb-textarea {
+.trapping-builder-app .tb-textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  font-family: "Crimson Pro", "Crimson Text", Georgia, serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #1a1008;
-  background: #faf5e8;
-  border: 1px solid #c4a66a;
-  border-radius: 3px;
   resize: vertical;
   min-height: 80px;
-  transition: border-color 0.2s;
-}
-
-.tb-textarea:focus {
-  outline: none;
-  border-color: #8b1a1a;
-  box-shadow: 0 0 0 2px rgba(139, 26, 26, 0.15);
-}
-
-.tb-textarea::placeholder {
-  color: #9e8e6e;
-  font-style: italic;
 }
 
 /* ----- Controls ----- */
-.tb-controls {
+.trapping-builder-app .tb-controls {
   display: flex;
   gap: 8px;
   margin-top: 8px;
 }
 
 /* ----- Buttons ----- */
-.tb-btn {
+.trapping-builder-app .tb-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 7px 16px;
-  font-family: "Crimson Pro", "Crimson Text", Georgia, serif;
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
@@ -99,12 +74,12 @@
   transition: all 0.2s ease;
 }
 
-.tb-btn:disabled {
+.trapping-builder-app .tb-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.tb-btn-generate {
+.trapping-builder-app .tb-btn-generate {
   color: #f5f0e1;
   background: linear-gradient(135deg, #8b1a1a 0%, #5c1010 100%);
   border-color: #3a0808;
@@ -112,23 +87,23 @@
   flex: 1;
 }
 
-.tb-btn-generate:hover:not(:disabled) {
+.trapping-builder-app .tb-btn-generate:hover:not(:disabled) {
   background: linear-gradient(135deg, #a32020 0%, #701414 100%);
   box-shadow: 0 2px 6px rgba(139, 26, 26, 0.4);
 }
 
-.tb-btn-reset {
+.trapping-builder-app .tb-btn-reset {
   color: #4a3c28;
-  background: #e8dcc8;
-  border-color: #c4a66a;
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
-.tb-btn-reset:hover {
-  background: #ddd0b8;
+.trapping-builder-app .tb-btn-reset:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
-.tb-btn-create,
-.tb-btn-actor {
+.trapping-builder-app .tb-btn-create,
+.trapping-builder-app .tb-btn-actor {
   color: #f5f0e1;
   background: linear-gradient(135deg, #2a5a28 0%, #1a3a18 100%);
   border-color: #0f220e;
@@ -136,84 +111,79 @@
   flex: 1;
 }
 
-.tb-btn-create:hover,
-.tb-btn-actor:hover {
+.trapping-builder-app .tb-btn-create:hover,
+.trapping-builder-app .tb-btn-actor:hover {
   background: linear-gradient(135deg, #367032 0%, #244a20 100%);
   box-shadow: 0 2px 6px rgba(42, 90, 40, 0.4);
 }
 
 /* ----- Error ----- */
-.tb-error {
+.trapping-builder-app .tb-error {
   display: flex;
   align-items: flex-start;
   gap: 8px;
   padding: 10px 12px;
-  background: #fde8e8;
-  border: 1px solid #e0a0a0;
+  background: rgba(200, 50, 50, 0.1);
+  border: 1px solid rgba(200, 50, 50, 0.3);
   border-left: 3px solid #8b1a1a;
   border-radius: 3px;
-  color: #5c1010;
   font-size: 13px;
   line-height: 1.4;
 }
 
-.tb-error i {
+.trapping-builder-app .tb-error i {
   color: #8b1a1a;
   margin-top: 2px;
   flex-shrink: 0;
 }
 
 /* ----- Preview Section ----- */
-.tb-section-title {
-  font-size: 14px;
+.trapping-builder-app .tb-section-title {
   font-weight: 700;
-  color: #2a1506;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin: 0 0 10px;
   padding-bottom: 6px;
-  border-bottom: 2px solid #c4a66a;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
 }
 
-.tb-section-title i {
+.trapping-builder-app .tb-section-title i {
   margin-right: 4px;
-  color: #8b1a1a;
 }
 
-.tb-preview-card {
-  background: #faf5e8;
-  border: 1px solid #c4a66a;
+.trapping-builder-app .tb-preview-card {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 4px;
   padding: 14px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.tb-preview-header {
+.trapping-builder-app .tb-preview-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 10px;
 }
 
-.tb-preview-icon {
+.trapping-builder-app .tb-preview-icon {
   width: 48px;
   height: 48px;
-  border: 2px solid #c4a66a;
+  border: 2px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px;
   object-fit: contain;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.5);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-.tb-preview-title h4 {
+.trapping-builder-app .tb-preview-title h4 {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: #2a1506;
   line-height: 1.2;
 }
 
-.tb-badge {
+.trapping-builder-app .tb-badge {
   display: inline-block;
   padding: 2px 8px;
   font-size: 10px;
@@ -226,94 +196,87 @@
   margin-top: 4px;
 }
 
-.tb-badge-trigger {
+.trapping-builder-app .tb-badge-trigger {
   background: #3a5a88;
   font-size: 9px;
   padding: 1px 6px;
   margin-left: 6px;
 }
 
-.tb-preview-description {
+.trapping-builder-app .tb-preview-description {
   font-size: 13px;
   line-height: 1.5;
-  color: #3a2a14;
   margin-bottom: 10px;
   padding: 8px;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 3px;
 }
 
-.tb-preview-description p {
+.trapping-builder-app .tb-preview-description p {
   margin: 0 0 6px;
 }
 
-.tb-preview-description p:last-child {
+.trapping-builder-app .tb-preview-description p:last-child {
   margin-bottom: 0;
 }
 
 /* ----- Stats row (weapon/armour) ----- */
-.tb-preview-stats {
+.trapping-builder-app .tb-preview-stats {
   display: flex;
   gap: 16px;
   padding: 8px 10px;
-  background: rgba(42, 21, 6, 0.06);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 3px;
   margin-bottom: 10px;
   font-size: 13px;
 }
 
-.tb-stat strong {
-  color: #2a1506;
-}
-
 /* ----- Effects list ----- */
-.tb-effects-list {
+.trapping-builder-app .tb-effects-list {
   margin-top: 10px;
 }
 
-.tb-effects-list h5 {
+.trapping-builder-app .tb-effects-list h5 {
   font-size: 12px;
   font-weight: 700;
-  color: #2a1506;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   margin: 0 0 8px;
 }
 
-.tb-effects-list h5 i {
+.trapping-builder-app .tb-effects-list h5 i {
   color: #b8860b;
   margin-right: 3px;
 }
 
-.tb-effect-row {
+.trapping-builder-app .tb-effect-row {
   padding: 8px 10px;
   margin-bottom: 6px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid #ddd0b8;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-left: 3px solid #b8860b;
   border-radius: 3px;
 }
 
-.tb-effect-header {
+.trapping-builder-app .tb-effect-header {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 4px;
 }
 
-.tb-effect-name {
+.trapping-builder-app .tb-effect-name {
   font-weight: 700;
   font-size: 13px;
-  color: #2a1506;
 }
 
-.tb-effect-script {
+.trapping-builder-app .tb-effect-script {
   display: block;
   font-family: "Courier New", Courier, monospace;
   font-size: 11px;
   line-height: 1.4;
   color: #3a5a88;
-  background: rgba(58, 90, 136, 0.06);
+  background: rgba(58, 90, 136, 0.08);
   padding: 4px 8px;
   border-radius: 2px;
   margin-top: 4px;
@@ -321,39 +284,29 @@
   white-space: pre-wrap;
 }
 
-.tb-no-effects {
+.trapping-builder-app .tb-no-effects {
   font-style: italic;
-  color: #9e8e6e;
+  opacity: 0.6;
   font-size: 13px;
 }
 
 /* ----- Action buttons ----- */
-.tb-actions {
+.trapping-builder-app .tb-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 12px;
 }
 
-.tb-actor-row {
+.trapping-builder-app .tb-actor-row {
   display: flex;
   gap: 8px;
   align-items: stretch;
 }
 
-.tb-actor-select {
+.trapping-builder-app .tb-actor-select {
   flex: 1;
   padding: 6px 10px;
-  font-family: "Crimson Pro", "Crimson Text", Georgia, serif;
   font-size: 13px;
-  color: #1a1008;
-  background: #faf5e8;
-  border: 1px solid #c4a66a;
   border-radius: 3px;
-}
-
-/* ----- Spinner animation ----- */
-@keyframes fa-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }

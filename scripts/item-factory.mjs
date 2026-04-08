@@ -1,6 +1,20 @@
 // ===========================================================================
 // Item Factory – Creates FoundryVTT Item documents from parsed AI data
 // ===========================================================================
+import { resolveIcon } from "./icon-resolver.mjs";
+
+/**
+ * Resolve the best icon for the item, replacing whatever the AI suggested.
+ * WFRP4e compendium icons are preferred, with Foundry built-ins as fallback.
+ */
+async function _resolveItemIcon(itemData) {
+  try {
+    const icon = await resolveIcon(itemData);
+    if (icon) itemData.img = icon;
+  } catch (e) {
+    console.warn("Trapping Builder | Icon resolution failed, keeping AI suggestion:", e);
+  }
+}
 
 /**
  * Create a world-level Item from parsed AI data.
@@ -8,6 +22,7 @@
  * @returns {Promise<Item>} The created Item document
  */
 export async function createWorldItem(itemData) {
+  await _resolveItemIcon(itemData);
   const { effects, ...coreData } = itemData;
   const item = await Item.create(coreData);
 
@@ -25,6 +40,7 @@ export async function createWorldItem(itemData) {
  * @returns {Promise<Item>} The created owned Item
  */
 export async function createActorItem(actor, itemData) {
+  await _resolveItemIcon(itemData);
   const { effects, ...coreData } = itemData;
   const [item] = await actor.createEmbeddedDocuments("Item", [coreData]);
 
@@ -43,11 +59,21 @@ async function _createEffects(item, effectsData) {
   const effectDocs = effectsData.map((efData) => {
     const effectObj = {
       name: efData.name ?? "Effect",
-      icon: efData.icon ?? "icons/svg/aura.svg",
+      icon: efData.icon ?? item.img ?? "icons/svg/aura.svg",
       transfer: efData.transfer ?? true,
       disabled: efData.disabled ?? false,
       flags: efData.flags ?? {},
     };
+
+    // Standard Foundry changes array (characteristic modifiers, movement, etc.)
+    if (efData.changes?.length) {
+      effectObj.changes = efData.changes;
+    }
+
+    // Duration (rounds for temporary effects)
+    if (efData.duration) {
+      effectObj.duration = efData.duration;
+    }
 
     // WFRP4e V8+ stores script/transfer data in effect.system
     if (efData.system) {

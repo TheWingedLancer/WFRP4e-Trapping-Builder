@@ -18,16 +18,22 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
   // -----------------------------------------------------------------------
   static DEFAULT_OPTIONS = {
     id: "trapping-builder",
-    classes: ["trapping-builder-app", "wfrp4e"],
-    tag: "div",
+    classes: ["sheet", "warhammer", "wfrp4e", "classic-font", "trapping-builder-app"],
+    tag: "form",
     window: {
       title: "TRAPPING_BUILDER.Title",
       icon: "fas fa-wand-magic-sparkles",
       resizable: true,
+      contentClasses: ["standard-form"],
     },
     position: {
       width: 560,
       height: "auto",
+    },
+    form: {
+      handler: TrappingBuilderApp.#onFormSubmit,
+      submitOnChange: false,
+      closeOnSubmit: false,
     },
     actions: {
       generate: TrappingBuilderApp.#onGenerate,
@@ -118,6 +124,12 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
   // -----------------------------------------------------------------------
   // Actions
   // -----------------------------------------------------------------------
+
+  /** Form submission handler — not used directly, we use action buttons */
+  static async #onFormSubmit(event, form, formData) {
+    event.preventDefault();
+  }
+
   static async #onGenerate(event, target) {
     // Grab text from the textarea
     const textarea = this.element.querySelector("#tb-description");

@@ -68,15 +68,39 @@ Store "SB+5" not 5, "SB+8" not 8. The value MUST be a string, not an integer.
 For ranged weapons, damage is a flat integer string with no SB — e.g. "4", "8".
 
 Standard WFRP4e base melee weapon damage formulas (stored in system.damage.value as a STRING):
-- Dagger: "SB+1"
+- Dagger: "SB+2"
 - Hand Weapon/Sword: "SB+4"
+- Axe: "SB+4"
+- Mace: "SB+4"
+- Club: "SB+4"
 - Zweihander/Greatsword: "SB+5"
-- Halberd: "SB+5"
+- Bastard Sword: "SB+5"
 - Great Axe: "SB+6"
-- Lance: "SB+5"
-- Rapier: "SB+3"
-- Flail: "SB+3"
+- Warhammer (two-handed): "SB+6"
+- Halberd: "SB+4"
+- Quarterstaff: "SB+4"
 - Spear: "SB+4"
+- Lance: "SB+6"
+- Rapier: "SB+4"
+- Foil: "SB+3"
+- Flail: "SB+5"
+- Main Gauche: "SB+2"
+- Shield: "SB+2"
+- Buckler: "SB+1"
+
+Standard ranged weapon damage (flat values, stored as string):
+- Shortbow: "SB+2"
+- Longbow: "SB+4"
+- Elf Bow: "SB+4"
+- Crossbow: "+9"
+- Crossbow Pistol: "+7"
+- Pistol: "+8"
+- Handgun: "+9"
+- Blunderbuss: "+8"
+- Throwing Knife: "SB+2"
+- Throwing Axe: "SB+3"
+- Javelin: "SB+3"
+- Sling: "+6"
 
 If the user asks for bonus damage ON TOP of a base weapon, ADD to the X value.
 Example: "Greatsword that deals +3 additional wounds" → base "SB+5", plus 3 = "SB+8"
@@ -107,77 +131,153 @@ Any bonuses the user describes are ADDED to the base damage value.
 
 ### Two-Handed (weaponGroup: "twohanded", twohanded: true)
 - Zweihander / Greatsword / Great Sword / Two-Handed Sword / Claymore / Montante / Flamberge → damage: "SB+5", reach: "long"
-- Great Axe / Greataxe / Two-Handed Axe / Battle Axe (two-handed) / Dane Axe → damage: "SB+6", reach: "long"
-- War Hammer (two-handed) / Great Hammer / Maul / Warhammer (two-handed) → damage: "SB+5", reach: "long"
+- Bastard Sword → damage: "SB+5", reach: "long"
+- Great Axe / Greataxe / Two-Handed Axe / Dane Axe → damage: "SB+6", reach: "long"
+- Warhammer (two-handed) / Great Hammer / Maul → damage: "SB+6", reach: "average"
 
 ### Basic (weaponGroup: "basic")
-- Hand Weapon / Sword / Longsword / Broadsword / Arming Sword / Bastard Sword / Cutlass / Sabre / Falchion / Scimitar → damage: "SB+4", reach: "average"
+- Hand Weapon / Sword / Longsword / Broadsword / Arming Sword / Cutlass / Sabre / Falchion / Scimitar → damage: "SB+4", reach: "average"
 - Axe / Hand Axe / Battle Axe / Hatchet / Tomahawk → damage: "SB+4", reach: "average"
-- Mace / Club / Hammer / War Hammer / Morning Star / Cudgel → damage: "SB+4", reach: "average"
-- Dagger / Knife / Stiletto / Dirk / Shiv / Main Gauche → damage: "SB+1", reach: "short"
-- Short Sword / Gladius / Seax / Machete → damage: "SB+3", reach: "short"
-- Spear (one-handed) / Javelin (melee) → damage: "SB+4", reach: "long"
-- Staff / Quarterstaff → damage: "SB+2", reach: "long"
+- Mace / Club / Hammer / Morning Star / Cudgel → damage: "SB+4", reach: "average"
+- Dagger / Knife / Stiletto / Dirk / Shiv → damage: "SB+2", reach: "vshort"
+- Military Pick → damage: "SB+4", reach: "average"
 
 ### Cavalry (weaponGroup: "cavalry")
-- Lance / Cavalry Lance / Jousting Lance → damage: "SB+5", reach: "vlong"
-- War Lance → damage: "SB+5", reach: "vlong"
+- Lance / Cavalry Lance / Jousting Lance → damage: "SB+6", reach: "vLong"
+- Demi-Lance → damage: "SB+5", reach: "long"
+- Cavalry Hammer → damage: "SB+5", reach: "long"
 
 ### Fencing (weaponGroup: "fencing")
-- Rapier / Foil / Epée / Smallsword → damage: "SB+3", reach: "long"
-- Estoc → damage: "SB+3", reach: "long"
+- Rapier / Epée / Smallsword → damage: "SB+4", reach: "long"
+- Foil → damage: "SB+3", reach: "average"
 
 ### Flail (weaponGroup: "flail")
-- Flail / Military Flail / Ball and Chain → damage: "SB+3", reach: "average"
-- Great Flail / Heavy Flail (two-handed) → damage: "SB+5", reach: "long", twohanded: true
+- Flail / Military Flail → damage: "SB+5", reach: "average"
 
 ### Parry (weaponGroup: "parry")
-- Buckler / Shield (small) → damage: "SB+2", reach: "short"
-- Shield / Shield (large) → damage: "SB+3", reach: "short"
+- Main Gauche → damage: "SB+2", reach: "vshort"
+
+### Basic — Shields (weaponGroup: "basic")
+- Shield (Buckler) / Buckler → damage: "SB+1", reach: "personal"
+- Shield / Shield (large) → damage: "SB+2", reach: "vshort"
 
 ### Polearm (weaponGroup: "polearm", twohanded: true)
-- Halberd / Poleaxe / Bardiche / Glaive / Voulge → damage: "SB+5", reach: "vlong"
-- Pike / Long Spear → damage: "SB+5", reach: "vlong"
-- Spear (two-handed) → damage: "SB+5", reach: "vlong"
+- Halberd / Poleaxe / Bardiche / Glaive / Voulge → damage: "SB+4", reach: "long"
+- Spear / Long Spear / Pike → damage: "SB+4", reach: "vLong"
+- Quarterstaff → damage: "SB+4", reach: "long"
 - Bill / Billhook → damage: "SB+4", reach: "long"
 
 ### Brawling (weaponGroup: "brawling")
 - Fist / Unarmed / Punch / Kick / Knuckledusters / Brass Knuckles / Gauntlet → damage: "SB+0", reach: "personal"
 
-### Ranged — Bow (weaponGroup: "bow")
-- Shortbow / Short Bow → damage: "4", reach: "personal"
-- Longbow / Long Bow / Self Bow → damage: "4", reach: "personal"
-- Elfbow / Elf Bow → damage: "4", reach: "personal"
+### Ranged — Bow (weaponGroup: "bow", twohanded: true)
+- Shortbow / Short Bow → damage: "SB+2"
+- Longbow / Long Bow / Self Bow → damage: "SB+4"
+- Elf Bow / Elfbow → damage: "SB+4"
 
 ### Ranged — Crossbow (weaponGroup: "crossbow")
-- Crossbow → damage: "8", reach: "personal"
-- Crossbow Pistol → damage: "4", reach: "personal"
-- Repeating Crossbow → damage: "4", reach: "personal"
+- Crossbow → damage: "+9", twohanded: true
+- Crossbow Pistol → damage: "+7"
 
 ### Ranged — Blackpowder (weaponGroup: "blackpowder")
-- Pistol / Flintlock Pistol → damage: "8", reach: "personal"
-- Handgun / Musket / Long Rifle → damage: "8", reach: "personal"
-- Blunderbuss → damage: "8", reach: "personal"
-- Hochland Long Rifle → damage: "10", reach: "personal"
+- Pistol / Flintlock Pistol → damage: "+8"
+- Handgun / Musket / Long Rifle → damage: "+9", twohanded: true
+- Blunderbuss → damage: "+8", twohanded: true
 
 ### Ranged — Throwing (weaponGroup: "throwing")
-- Throwing Knife / Throwing Dagger → damage: "SB+1", reach: "personal"
-- Throwing Axe / Throwing Hatchet → damage: "SB+2", reach: "personal"
-- Javelin (thrown) → damage: "SB+3", reach: "personal"
+- Throwing Knife / Throwing Dagger → damage: "SB+2"
+- Throwing Axe / Throwing Hatchet → damage: "SB+3"
+- Javelin (thrown) → damage: "SB+3"
 
 ### Ranged — Sling (weaponGroup: "sling")
-- Sling / Staff Sling → damage: "4", reach: "personal"
+- Sling / Staff Sling → damage: "+6"
 
 ### Ranged — Entangling (weaponGroup: "entangling")
-- Net / Bola / Lasso → damage: "0", reach: "personal"
-
-### Ranged — Engineering (weaponGroup: "engineering")
-- Cannon / Mortar → damage: "16", reach: "personal"
+- Net / Bola / Lasso → damage: "SB+3"
 
 ### Ranged — Explosives (weaponGroup: "explosives")
-- Bomb / Grenade / Fire Bomb / Incendiary → damage: "8", reach: "personal"
+- Bomb / Grenade / Fire Bomb / Incendiary → damage: "+12"
 
 IMPORTANT: If the user describes a weapon that doesn't match any above, pick the closest match and note the assumption in the item description. Always default to the WFRP4e canonical stats as the base, then apply any user-requested modifications on top.
+
+## WEAPON QUALITIES AND FLAWS — ALWAYS INCLUDE BASE QUALITIES
+Every weapon in WFRP4e has base qualities and/or flaws that MUST be included when generating the item.
+The qualities and flaws arrays contain objects with "name" and optionally "value" (for rated qualities).
+
+Format: { "name": "Quality Name", "value": N } or just { "name": "Quality Name" }
+
+### Standard weapon qualities:
+- Accurate — +10 to hit at long range
+- Blackpowder — Uses blackpowder, misfires on fumbles
+- Blast (N) — Hits all within N yards (rated)
+- Damaging — Can use higher of SB or rolled units die for damage
+- Defensive — +1 SL when defending
+- Distract — Can use to Distract opponent as a Free Action
+- Entangle — Can entangle target
+- Fast — +10 Initiative when determining combat order
+- Hack — Crits cause extra bleeding
+- Impact — Can use higher of SB or rolled units die for damage on charge
+- Impale — Crits cause impale
+- Penetrating — Ignores AP equal to weapon's damage bonus
+- Pistol — Can be used in close combat
+- Precise — +1 SL on critical hits
+- Pummel — Can use to stun
+- Repeater (N) — Can fire N shots before reloading
+- Shield (N) — Adds N to AP on locations
+- Trap Blade — Can trap opponent's weapon
+- Unbreakable — Cannot be damaged
+- Wrap — Can attack around shields
+
+### Standard weapon flaws:
+- Dangerous — Fumbles cause damage to wielder
+- Imprecise — -1 SL on hits
+- Reload (N) — Takes N actions to reload (rated)
+- Slow — -10 Initiative for combat order
+- Tiring — Cannot use special abilities after first round
+- Undamaging — Minimum 1 damage, max is SB
+- Wrap — (also a flaw for some weapons)
+
+### Base qualities/flaws by weapon type (MUST be included — from canonical WFRP4e data):
+
+Zweihander/Greatsword: qualities: [{"name":"damaging"},{"name":"hack"}], flaws: []
+Bastard Sword: qualities: [{"name":"damaging"},{"name":"defensive"}], flaws: []
+Hand Weapon/Sword: qualities: [], flaws: []
+Dagger/Knife: qualities: [], flaws: []
+Axe: qualities: [{"name":"hack"}], flaws: [{"name":"unbalanced"}]
+Club: qualities: [], flaws: [{"name":"undamaging"},{"name":"unbalanced"}]
+Mace: qualities: [{"name":"pummel"}], flaws: [{"name":"unbalanced"}]
+Military Pick: qualities: [{"name":"penetrating"}], flaws: [{"name":"unbalanced"}]
+Rapier: qualities: [{"name":"fast"},{"name":"impale"}], flaws: []
+Foil: qualities: [{"name":"fast"},{"name":"impale"},{"name":"precise"}], flaws: [{"name":"undamaging"}]
+Halberd: qualities: [{"name":"defensive"},{"name":"hack"},{"name":"impale"}], flaws: []
+Great Axe: qualities: [{"name":"impact"},{"name":"hack"}], flaws: [{"name":"tiring"}]
+Spear (polearm): qualities: [{"name":"impale"}], flaws: []
+Quarterstaff: qualities: [{"name":"defensive"},{"name":"pummel"}], flaws: []
+Lance: qualities: [{"name":"impact"},{"name":"impale"}], flaws: []
+Demi-Lance: qualities: [{"name":"impact"},{"name":"impale"}], flaws: []
+Cavalry Hammer: qualities: [{"name":"pummel"}], flaws: []
+Flail: qualities: [{"name":"distract"},{"name":"wrap"}], flaws: []
+Warhammer (two-handed): qualities: [{"name":"damaging"},{"name":"pummel"}], flaws: [{"name":"slow"}]
+Main Gauche: qualities: [{"name":"defensive"}], flaws: []
+Shield: qualities: [{"name":"shield","value":2},{"name":"defensive"}], flaws: [{"name":"undamaging"}]
+Shield (Buckler): qualities: [{"name":"shield","value":1},{"name":"defensive"}], flaws: [{"name":"undamaging"}]
+
+Longbow: qualities: [{"name":"damaging"}], flaws: []
+Shortbow: qualities: [], flaws: []
+Elf Bow: qualities: [{"name":"damaging"},{"name":"precise"}], flaws: []
+Crossbow: qualities: [], flaws: [{"name":"reload","value":1}]
+Crossbow Pistol: qualities: [{"name":"pistol"}], flaws: []
+Pistol: qualities: [{"name":"pistol"},{"name":"blackpowder"},{"name":"damaging"}], flaws: [{"name":"reload","value":1}]
+Handgun: qualities: [{"name":"damaging"},{"name":"blackpowder"}], flaws: [{"name":"reload","value":3},{"name":"dangerous"}]
+Blunderbuss: qualities: [{"name":"blast","value":3},{"name":"blackpowder"},{"name":"damaging"}], flaws: [{"name":"reload","value":2},{"name":"dangerous"}]
+Throwing Knife: qualities: [], flaws: []
+Throwing Axe: qualities: [{"name":"hack"}], flaws: []
+Javelin: qualities: [{"name":"impale"}], flaws: []
+Sling: qualities: [], flaws: []
+Net: qualities: [{"name":"entangle"}], flaws: []
+
+IMPORTANT: Quality and flaw names must be LOWERCASE in the JSON (e.g. "damaging" not "Damaging").
+When creating a modified/enchanted weapon, ALWAYS start with the base qualities and flaws above, then ADD any extra qualities the user specifies. Never omit the base qualities/flaws unless the user explicitly says to remove them.
 
 ## EFFECT APPLICATION / TRANSFER DATA
 The transferData field controls HOW and WHEN an effect is applied:
@@ -383,9 +483,128 @@ If the user describes ANY of these, create a consumable (not a generic trapping)
 - Tools: type="trapping", trappingType="toolsAndKits"
 - Books: type="trapping", trappingType="booksAndDocuments"
 - Clothing/jewelry: type="trapping", trappingType="clothingAccessories"
+- Trade tools: type="trapping", trappingType="tradeTools"
 - Weapons: type="weapon" (include weaponGroup, reach, damage, twohanded)
-- Armour: type="armour" (include maxAP, penalty, locations)
+- Armour: type="armour" (include maxAP, penalty, locations, qualities, flaws)
+- Containers: type="container" (include carries, wearable)
 - Generic miscellaneous: type="trapping", trappingType="misc"
+
+## ARMOUR BASE STATS (from canonical WFRP4e data)
+When creating armour, start with the base stats below and apply modifications on top.
+The "locations" object has keys: head, body, lArm, rArm, lLeg, rLeg (booleans).
+
+### Leather Armour
+- Leather Skullcap: maxAP: 1, penalty: "", enc: 0, locations: {head:true}, qualities: [], flaws: [{"name":"partial"}]
+- Leather Jack: maxAP: 1, penalty: "", enc: 1, locations: {body:true,lArm:true,rArm:true}, qualities: [], flaws: []
+- Leather Jerkin: maxAP: 1, penalty: "", enc: 1, locations: {body:true}, qualities: [], flaws: []
+- Leather Leggings: maxAP: 1, penalty: "", enc: 1, locations: {lLeg:true,rLeg:true}, qualities: [], flaws: []
+
+### Mail Armour
+- Mail Coif: maxAP: 2, penalty: "-10 Perception", enc: 2, locations: {head:true}, qualities: [{"name":"flexible"}], flaws: [{"name":"partial"}]
+- Mail Shirt: maxAP: 2, penalty: "", enc: 2, locations: {body:true,lArm:true,rArm:true}, qualities: [{"name":"flexible"}], flaws: []
+- Mail Coat: maxAP: 2, penalty: "", enc: 3, locations: {body:true,lArm:true,rArm:true}, qualities: [{"name":"flexible"}], flaws: []
+- Mail Chausses: maxAP: 2, penalty: "", enc: 3, locations: {lLeg:true,rLeg:true}, qualities: [{"name":"flexible"}], flaws: []
+
+### Plate Armour
+- Plate Open Helm: maxAP: 2, penalty: "-10 Perception", enc: 1, locations: {head:true}, qualities: [], flaws: [{"name":"partial"}]
+- Plate Helm: maxAP: 2, penalty: "-20 Perception", enc: 2, locations: {head:true}, qualities: [{"name":"impenetrable"}], flaws: [{"name":"weakpoints"}]
+- Plate Breastplate: maxAP: 2, penalty: "", enc: 3, locations: {body:true}, qualities: [{"name":"impenetrable"}], flaws: [{"name":"weakpoints"}]
+- Plate Bracers: maxAP: 2, penalty: "", enc: 3, locations: {lArm:true,rArm:true}, qualities: [{"name":"impenetrable"}], flaws: [{"name":"weakpoints"}]
+- Plate Leggings: maxAP: 2, penalty: "-10 Stealth", enc: 3, locations: {lLeg:true,rLeg:true}, qualities: [{"name":"impenetrable"}], flaws: [{"name":"weakpoints"}]
+
+### Other Armour
+- Cloak: type "armour" but worn as clothing, covers body
+- Sea Dragon Cloak: maxAP varies, enc: 0, qualities: [], flaws: [{"name":"partial"}]
+
+### Armour quality reference:
+- flexible — No stealth penalty
+- impenetrable — Critical hits don't bypass AP
+- partial — Only covers part of the location
+- weakpoints — Critical hits may find gaps
+
+### Armour flaw reference:
+- partial — Only protects part of the hit location
+- weakpoints — Critical hits bypass this armour
+
+When the user asks for "enchanted plate armour" or "magical mail shirt", start with the base stats above and ADD effects/bonuses on top.
+
+## CONTAINER BASE STATS (from canonical WFRP4e data)
+- Backpack: wearable: true, carries: 4, enc: 2
+- Pouch: wearable: true, carries: 1, enc: 0
+- Sling Bag: wearable: true, carries: 2, enc: 1
+- Sack: wearable: false, carries: 4, enc: 2
+- Sack, Large: wearable: false, carries: 6, enc: 3
+- Saddlebags: wearable: false, carries: 8, enc: 4
+- Barrel: wearable: false, carries: 12, enc: 6
+- Flask: wearable: false, carries: 0, enc: 0
+- Waterskin: wearable: false, carries: 1, enc: 1
+- Scroll Case: wearable: false, carries: 0, enc: 0
+- Jug: wearable: false, carries: 1, enc: 1
+- Cart: wearable: false, carries: 25, enc: 0
+- Wagon: wearable: false, carries: 30, enc: 0
+
+## TRAPPING BASE STATS (from canonical WFRP4e data)
+Use these as starting points when the user wants modified versions.
+
+### Clothing & Accessories (trappingType: "clothingAccessories")
+- Clothing: enc: 1, price: {gc:0,ss:6,bp:0}
+- Cloak: enc: 1, price: {gc:0,ss:10,bp:0}
+- Coat: enc: 1, price: {gc:0,ss:18,bp:0}
+- Boots: enc: 1, price: {gc:0,ss:5,bp:0}
+- Hat: enc: 0, price: {gc:0,ss:4,bp:0}
+- Hood: enc: 0, price: {gc:0,ss:5,bp:0}
+- Gloves: enc: 0, price: {gc:0,ss:4,bp:0}
+- Costume: enc: 1, price: {gc:1,ss:0,bp:0}
+- Courtly Garb: enc: 1, price: {gc:12,ss:0,bp:0}
+- Amulet: enc: 0, price: {gc:0,ss:0,bp:2}
+- Ring: enc: 0, price: {gc:0,ss:0,bp:6}
+- Bandoleer: enc: 1, price: {gc:0,ss:6,bp:0}
+
+### Food & Drink (trappingType: "foodAndDrink")
+- Rations, 1 day: enc: 0, price: {gc:0,ss:2,bp:0}
+- Meal, inn: enc: 0, price: {gc:0,ss:1,bp:0}
+- Ale, pint: enc: 0, price: {gc:0,ss:0,bp:3}
+- Spirits, pint: enc: 0, price: {gc:0,ss:2,bp:0}
+- Wine, bottle: enc: 0, price: {gc:0,ss:0,bp:10}
+- Flask of Spirits: enc: 0, price: {gc:0,ss:5,bp:0}
+
+### Drugs, Poisons, Herbs & Draughts (trappingType: "drugsPoisonsHerbsDraughts")
+- Healing Draught: enc: 0, price: {gc:0,ss:10,bp:0}
+- Healing Poultice: enc: 0, price: {gc:0,ss:12,bp:0}
+- Antitoxin Kit: enc: 0, price: {gc:3,ss:0,bp:0}
+- Black Lotus: enc: 0, price: {gc:20,ss:0,bp:0}
+- Mandrake Root: enc: 0, price: {gc:15,ss:0,bp:0}
+- Ranald's Delight: enc: 0, price: {gc:2,ss:0,bp:0}
+- Vitality Draught: enc: 0, price: {gc:0,ss:10,bp:0}
+- Night Vision Potion: enc: 0, price: {gc:5,ss:0,bp:0}
+
+### Tools & Kits (trappingType: "toolsAndKits")
+- Lock Picks: enc: 0, price: {gc:5,ss:0,bp:0}
+- Rope, 10 yards: enc: 2, price: {gc:0,ss:6,bp:0}
+- Grappling Hook: enc: 1, price: {gc:0,ss:5,bp:0}
+- Lantern: enc: 1, price: {gc:0,ss:7,bp:0}
+- Torch: enc: 0, price: {gc:0,ss:0,bp:2}
+- Tent: enc: 2, price: {gc:0,ss:10,bp:0}
+- Disguise Kit: enc: 0, price: {gc:0,ss:6,bp:6}
+- Compass: enc: 0, price: {gc:0,ss:10,bp:0}
+- Crowbar: enc: 1, price: {gc:0,ss:2,bp:6}
+- Trade Tools (Type): enc: 1, price: {gc:3,ss:0,bp:0}
+
+### Books & Documents (trappingType: "booksAndDocuments")
+- Book (generic): enc: 1, price varies by subject (1gc to 20gc)
+- Map: enc: 0, price: {gc:3,ss:0,bp:0}
+- Parchment/sheet: enc: 0, price: {gc:0,ss:1,bp:0}
+
+### Miscellaneous (trappingType: "misc")
+- Bandage: enc: 0, price: {gc:0,ss:0,bp:4}
+- Bedroll: enc: 1, price: {gc:0,ss:6,bp:0}
+- Blanket: enc: 0, price: {gc:0,ss:0,bp:8}
+- Candle: enc: 0, price: {gc:0,ss:1,bp:0}
+- Cooking Pot: enc: 1, price: {gc:0,ss:8,bp:0}
+- Tankard/Cup: enc: 0, price: {gc:0,ss:0,bp:8}
+- Plate/Bowl: enc: 0, price: {gc:0,ss:1,bp:0}
+
+When creating a modified trapping (e.g. "enchanted backpack", "blessed cloak", "magical lockpicks"), always start with the canonical base stats above and then ADD the requested modifications (effects, bonuses, etc.) on top.
 
 ## Icon selection:
 Choose an appropriate icon path from FoundryVTT defaults:
