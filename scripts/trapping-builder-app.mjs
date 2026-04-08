@@ -168,6 +168,7 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
 
   static async #onCreateWorld(event, target) {
     if (!this.#parsedData) return;
+    this.#applyNameOverride();
 
     try {
       const item = await createWorldItem(this.#parsedData);
@@ -184,6 +185,7 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
 
   static async #onCreateActor(event, target) {
     if (!this.#parsedData) return;
+    this.#applyNameOverride();
 
     // Read the selected actor from the dropdown
     const select = this.element.querySelector("#tb-actor-select");
@@ -207,6 +209,15 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     } catch (err) {
       console.error("Trapping Builder | Creation failed:", err);
       ui.notifications.error(`Failed to add item: ${err.message}`);
+    }
+  }
+
+  /** Read the name input and apply it to the parsed data before creation */
+  #applyNameOverride() {
+    const nameInput = this.element.querySelector("#tb-item-name");
+    const newName = nameInput?.value?.trim();
+    if (newName && this.#parsedData) {
+      this.#parsedData.name = newName;
     }
   }
 }
