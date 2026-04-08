@@ -56,11 +56,15 @@ export async function createActorItem(actor, itemData) {
  * Handles WFRP4e-specific scriptData and transferData structures.
  */
 async function _createEffects(item, effectsData) {
+  // Detect if this is a consumable — consumable effects MUST have transfer: false
+  const isConsumable = !!item.flags?.["wfrp4e-consumables-with-effects"]?.isConsumable;
+  const itemIcon = item.img ?? "icons/svg/aura.svg";
+
   const effectDocs = effectsData.map((efData) => {
     const effectObj = {
       name: efData.name ?? "Effect",
-      icon: efData.icon ?? item.img ?? "icons/svg/aura.svg",
-      transfer: efData.transfer ?? true,
+      icon: efData.icon || itemIcon,
+      transfer: isConsumable ? false : (efData.transfer ?? true),
       disabled: efData.disabled ?? false,
       flags: efData.flags ?? {},
     };
