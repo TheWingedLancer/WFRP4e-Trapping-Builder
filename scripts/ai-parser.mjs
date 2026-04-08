@@ -28,7 +28,7 @@ RESPOND WITH ONLY VALID JSON. No markdown, no backticks, no explanation.
     "flaws": { "value": [] },
     "weaponGroup": { "value": "basic|cavalry|fencing|brawling|flail|parry|polearm|twohanded|blackpowder|bow|crossbow|entangling|engineering|explosives|sling|throwing" },
     "reach": { "value": "personal|vshort|short|average|long|vlong|massive" },
-    "damage": { "value": 0 },
+    "damage": { "value": "SB+4" },
     "twohanded": { "value": false },
     "penalty": { "value": 0 },
     "maxAP": { "value": 0 },
@@ -61,26 +61,26 @@ RESPOND WITH ONLY VALID JSON. No markdown, no backticks, no explanation.
 }
 
 ## WEAPON DAMAGE — CRITICAL
-In WFRP4e, melee weapon damage is ALWAYS "SB + X" where SB = Strength Bonus (Strength/10 rounded down).
-The "damage" field stores ONLY the X value. The system automatically prepends "SB +" when displaying melee weapons.
-So for a Zweihander with SB+5, you store damage: 5 (NOT 5+SB, NOT "SB+5", just the integer 5).
+In WFRP4e, melee weapon damage uses the formula "SB+X" where SB = Strength Bonus.
+The "damage" field MUST be a STRING containing the full formula for melee weapons.
+Store "SB+5" not 5, "SB+8" not 8. The value MUST be a string, not an integer.
 
-For ranged weapons, damage is a flat value — no SB is added. Store the full damage number.
+For ranged weapons, damage is a flat integer string with no SB — e.g. "4", "8".
 
-Standard WFRP4e base melee weapon damage values (the integer stored in system.damage.value):
-- Dagger: SB+1 → store 1
-- Hand Weapon/Sword: SB+4 → store 4
-- Zweihander/Greatsword: SB+5 → store 5
-- Halberd: SB+5 → store 5
-- Great Axe: SB+6 → store 6
-- Lance: SB+5 → store 5
-- Rapier: SB+3 → store 3
-- Flail: SB+3 → store 3
-- Spear: SB+4 → store 4
+Standard WFRP4e base melee weapon damage formulas (stored in system.damage.value as a STRING):
+- Dagger: "SB+1"
+- Hand Weapon/Sword: "SB+4"
+- Zweihander/Greatsword: "SB+5"
+- Halberd: "SB+5"
+- Great Axe: "SB+6"
+- Lance: "SB+5"
+- Rapier: "SB+3"
+- Flail: "SB+3"
+- Spear: "SB+4"
 
-If the user asks for bonus damage ON TOP of a base weapon, ADD to the base value.
-Example: "Greatsword that deals +3 additional wounds" → base 5 + 3 = store 8
-Example: "Enchanted sword with +2 damage" → base 4 + 2 = store 6
+If the user asks for bonus damage ON TOP of a base weapon, ADD to the X value.
+Example: "Greatsword that deals +3 additional wounds" → base "SB+5", plus 3 = "SB+8"
+Example: "Enchanted sword with +2 damage" → base "SB+4", plus 2 = "SB+6"
 
 ## WEAPON GROUPS AND SKILLS
 Each weapon group maps to a specific Melee or Ranged skill:
@@ -101,8 +101,83 @@ Each weapon group maps to a specific Melee or Ranged skill:
 - sling → Ranged (Sling)
 - throwing → Ranged (Throwing)
 
-A "greatsword" or "zweihander" is weaponGroup "twohanded", reach "long", twohanded: true.
-A "longsword" or "hand weapon" is weaponGroup "basic", reach "average".
+## WEAPON NAME → STATS MAPPING — CRITICAL
+When the user names a weapon, map it to the correct WFRP4e base stats below BEFORE applying any bonuses.
+Any bonuses the user describes are ADDED to the base damage value.
+
+### Two-Handed (weaponGroup: "twohanded", twohanded: true)
+- Zweihander / Greatsword / Great Sword / Two-Handed Sword / Claymore / Montante / Flamberge → damage: "SB+5", reach: "long"
+- Great Axe / Greataxe / Two-Handed Axe / Battle Axe (two-handed) / Dane Axe → damage: "SB+6", reach: "long"
+- War Hammer (two-handed) / Great Hammer / Maul / Warhammer (two-handed) → damage: "SB+5", reach: "long"
+
+### Basic (weaponGroup: "basic")
+- Hand Weapon / Sword / Longsword / Broadsword / Arming Sword / Bastard Sword / Cutlass / Sabre / Falchion / Scimitar → damage: "SB+4", reach: "average"
+- Axe / Hand Axe / Battle Axe / Hatchet / Tomahawk → damage: "SB+4", reach: "average"
+- Mace / Club / Hammer / War Hammer / Morning Star / Cudgel → damage: "SB+4", reach: "average"
+- Dagger / Knife / Stiletto / Dirk / Shiv / Main Gauche → damage: "SB+1", reach: "short"
+- Short Sword / Gladius / Seax / Machete → damage: "SB+3", reach: "short"
+- Spear (one-handed) / Javelin (melee) → damage: "SB+4", reach: "long"
+- Staff / Quarterstaff → damage: "SB+2", reach: "long"
+
+### Cavalry (weaponGroup: "cavalry")
+- Lance / Cavalry Lance / Jousting Lance → damage: "SB+5", reach: "vlong"
+- War Lance → damage: "SB+5", reach: "vlong"
+
+### Fencing (weaponGroup: "fencing")
+- Rapier / Foil / Epée / Smallsword → damage: "SB+3", reach: "long"
+- Estoc → damage: "SB+3", reach: "long"
+
+### Flail (weaponGroup: "flail")
+- Flail / Military Flail / Ball and Chain → damage: "SB+3", reach: "average"
+- Great Flail / Heavy Flail (two-handed) → damage: "SB+5", reach: "long", twohanded: true
+
+### Parry (weaponGroup: "parry")
+- Buckler / Shield (small) → damage: "SB+2", reach: "short"
+- Shield / Shield (large) → damage: "SB+3", reach: "short"
+
+### Polearm (weaponGroup: "polearm", twohanded: true)
+- Halberd / Poleaxe / Bardiche / Glaive / Voulge → damage: "SB+5", reach: "vlong"
+- Pike / Long Spear → damage: "SB+5", reach: "vlong"
+- Spear (two-handed) → damage: "SB+5", reach: "vlong"
+- Bill / Billhook → damage: "SB+4", reach: "long"
+
+### Brawling (weaponGroup: "brawling")
+- Fist / Unarmed / Punch / Kick / Knuckledusters / Brass Knuckles / Gauntlet → damage: "SB+0", reach: "personal"
+
+### Ranged — Bow (weaponGroup: "bow")
+- Shortbow / Short Bow → damage: "4", reach: "personal"
+- Longbow / Long Bow / Self Bow → damage: "4", reach: "personal"
+- Elfbow / Elf Bow → damage: "4", reach: "personal"
+
+### Ranged — Crossbow (weaponGroup: "crossbow")
+- Crossbow → damage: "8", reach: "personal"
+- Crossbow Pistol → damage: "4", reach: "personal"
+- Repeating Crossbow → damage: "4", reach: "personal"
+
+### Ranged — Blackpowder (weaponGroup: "blackpowder")
+- Pistol / Flintlock Pistol → damage: "8", reach: "personal"
+- Handgun / Musket / Long Rifle → damage: "8", reach: "personal"
+- Blunderbuss → damage: "8", reach: "personal"
+- Hochland Long Rifle → damage: "10", reach: "personal"
+
+### Ranged — Throwing (weaponGroup: "throwing")
+- Throwing Knife / Throwing Dagger → damage: "SB+1", reach: "personal"
+- Throwing Axe / Throwing Hatchet → damage: "SB+2", reach: "personal"
+- Javelin (thrown) → damage: "SB+3", reach: "personal"
+
+### Ranged — Sling (weaponGroup: "sling")
+- Sling / Staff Sling → damage: "4", reach: "personal"
+
+### Ranged — Entangling (weaponGroup: "entangling")
+- Net / Bola / Lasso → damage: "0", reach: "personal"
+
+### Ranged — Engineering (weaponGroup: "engineering")
+- Cannon / Mortar → damage: "16", reach: "personal"
+
+### Ranged — Explosives (weaponGroup: "explosives")
+- Bomb / Grenade / Fire Bomb / Incendiary → damage: "8", reach: "personal"
+
+IMPORTANT: If the user describes a weapon that doesn't match any above, pick the closest match and note the assumption in the item description. Always default to the WFRP4e canonical stats as the base, then apply any user-requested modifications on top.
 
 ## EFFECT APPLICATION / TRANSFER DATA
 The transferData field controls HOW and WHEN an effect is applied:
@@ -336,7 +411,7 @@ Choose an appropriate icon path from FoundryVTT defaults:
 1. ALWAYS return valid JSON only — no markdown, no explanation, no backticks
 2. Only include system fields relevant to the item type (don't include weaponGroup on armour, etc.)
 3. Scripts must be valid inline JavaScript strings with properly escaped quotes
-4. Weapon damage value is the BONUS added to SB, not total damage. A Zweihander is 5, not SB+5
+4. Melee weapon damage MUST be a string formula like "SB+5", never a plain integer. Ranged damage is a flat string like "8".
 5. For wearable/equippable gear, set equipTransfer: true
 6. For consumable one-shot items, set equipTransfer: false and use "immediate" trigger
 7. Use Changes for simple characteristic modifiers; use Scripts for complex behavior
