@@ -413,9 +413,10 @@ Consumable items (potions, drugs, food, herbs, mushrooms) MUST be compatible wit
 The effect should be in the "effects" array with:
 - transfer: false (CRITICAL — the consumables module transfers it manually on consume)
 - changes: [] array for characteristic modifiers (key/mode/value)
-- duration: { rounds: N } if the effect is temporary
+- DO NOT include "system" or "transferData" or "scriptData" on consumable effects — these cause auto-application bugs
+- DO NOT include "duration" unless the user EXPLICITLY asks for a timed/temporary effect with a specific round count
 - flags: { "wfrp4e": { "effectApplication": "actor" }, "wfrp4e-consumables-with-effects": { "consumableEffect": true } }
-- NO scriptData needed for simple consumables — the consumables module handles everything
+- NO scriptData, NO system block — the consumables module handles everything
 
 ### Conditions in consumable flags:
 For consumables that add/remove conditions, put them in the item flags (NOT as scripts):

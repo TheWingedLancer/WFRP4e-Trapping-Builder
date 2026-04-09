@@ -3,6 +3,8 @@
 // ===========================================================================
 import { resolveIcon } from "./icon-resolver.mjs";
 
+const CONSUMABLE_MODULE_ID = "wfrp4e-consumables-with-effects";
+
 /**
  * Resolve the best icon for the item, replacing whatever the AI suggested.
  * WFRP4e compendium icons are preferred, with Foundry built-ins as fallback.
@@ -17,17 +19,25 @@ async function _resolveItemIcon(itemData) {
 }
 
 /**
+ * Check if the raw itemData represents a consumable.
+ */
+function _isConsumable(itemData) {
+  return !!itemData.flags?.[CONSUMABLE_MODULE_ID]?.isConsumable;
+}
+
+/**
  * Create a world-level Item from parsed AI data.
  * @param {object} itemData - Parsed item data from AI
  * @returns {Promise<Item>} The created Item document
  */
 export async function createWorldItem(itemData) {
   await _resolveItemIcon(itemData);
+  const consumable = _isConsumable(itemData);
   const { effects, ...coreData } = itemData;
   const item = await Item.create(coreData);
 
   if (effects?.length) {
-    await _createEffects(item, effects);
+    await _createEffects(item, effects, consumable);
   }
 
   return item;
@@ -41,11 +51,12 @@ export async function createWorldItem(itemData) {
  */
 export async function createActorItem(actor, itemData) {
   await _resolveItemIcon(itemData);
+  const consumable = _isConsumable(itemData);
   const { effects, ...coreData } = itemData;
   const [item] = await actor.createEmbeddedDocuments("Item", [coreData]);
 
   if (effects?.length) {
-    await _createEffects(item, effects);
+    await _createEffects(item, effects, consumable);
   }
 
   return item;
@@ -53,20 +64,20 @@ export async function createActorItem(actor, itemData) {
 
 /**
  * Create ActiveEffects on an item from the AI-generated effect data.
- * Handles WFRP4e-specific scriptData and transferData structures.
+ *
+ * For consumables: forces transfer:false, strips ALL system/transferData/scriptData,
+ * and only keeps the changes array. The consumables-with-effects module handles
+ * the actual application on consume via its own consumeItem() function.
  */
-async function _createEffects(item, effectsData) {
-  // Detect if this is a consumable — consumable effects MUST have transfer: false
-  const isConsumable = !!item.flags?.["wfrp4e-consumables-with-effects"]?.isConsumable;
-  const itemIcon = item.img ?? "icons/svg/aura.svg";
+async function _createEffects(item, effectsData, isConsumable) {
+  const itemIcon = item.img || "icons/svg/aura.svg";
 
   const effectDocs = effectsData.map((efData) => {
     const effectObj = {
       name: efData.name ?? "Effect",
-      icon: efData.icon || itemIcon,
+      icon: itemIcon,
       transfer: isConsumable ? false : (efData.transfer ?? true),
       disabled: efData.disabled ?? false,
-      flags: efData.flags ?? {},
     };
 
     // Standard Foundry changes array (characteristic modifiers, movement, etc.)
@@ -74,14 +85,30 @@ async function _createEffects(item, effectsData) {
       effectObj.changes = efData.changes;
     }
 
-    // Duration (rounds for temporary effects)
-    if (efData.duration) {
-      effectObj.duration = efData.duration;
-    }
+    if (isConsumable) {
+      // CONSUMABLE PATH: The consumables-with-effects module handles everything.
+      // - transfer MUST be false (set above)
+      // - Do NOT include system.transferData (causes WFRP4e to auto-apply)
+      // - Do NOT include system.scriptData (not needed for consumables)
+      // - Only include duration if the user explicitly requested timed effects
+      effectObj.flags = {
+        wfrp4e: { effectApplication: "actor" },
+        [CONSUMABLE_MODULE_ID]: { consumableEffect: true },
+      };
+      if (efData.duration?.rounds) {
+        effectObj.duration = { rounds: efData.duration.rounds };
+      }
+    } else {
+      // NON-CONSUMABLE PATH: pass through AI-generated config
+      effectObj.flags = efData.flags ?? {};
 
-    // WFRP4e V8+ stores script/transfer data in effect.system
-    if (efData.system) {
-      effectObj.system = efData.system;
+      if (efData.duration) {
+        effectObj.duration = efData.duration;
+      }
+
+      if (efData.system) {
+        effectObj.system = efData.system;
+      }
     }
 
     return effectObj;
@@ -105,15 +132,24 @@ export function buildPreviewSummary(itemData) {
   if (itemData.effects?.length) {
     for (const ef of itemData.effects) {
       const scripts = ef.system?.scriptData ?? [];
+      const changes = ef.changes ?? [];
       summary.effects.push({
         name: ef.name,
-        trigger: scripts.map((s) => s.trigger).join(", ") || "passive",
+        trigger: scripts.length
+          ? scripts.map((s) => s.trigger).join(", ")
+          : changes.length
+            ? "changes"
+            : "passive",
         scriptCount: scripts.length,
+        changeCount: changes.length,
         scripts: scripts.map((s) => ({
           label: s.label ?? "Script",
           trigger: s.trigger,
           preview: _truncateScript(s.script),
         })),
+        changes: changes
+          .filter((c) => !c.key?.includes("calculationBonusModifier"))
+          .map((c) => `${c.key}: ${c.value}`),
       });
     }
   }
