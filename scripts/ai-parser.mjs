@@ -213,11 +213,14 @@ Format: { "name": "Quality Name", "value": N } or just { "name": "Quality Name" 
 - Damaging — Can use higher of SB or rolled units die for damage
 - Defensive — +1 SL when defending
 - Distract — Can use to Distract opponent as a Free Action
+- Durable (N) — Extra durability (rated)
 - Entangle — Can entangle target
 - Fast — +10 Initiative when determining combat order
+- Fine (N) — Superior craftsmanship (rated)
 - Hack — Crits cause extra bleeding
 - Impact — Can use higher of SB or rolled units die for damage on charge
 - Impale — Crits cause impale
+- Magical — This weapon counts as magical for purposes of harming creatures immune to non-magical weapons
 - Penetrating — Ignores AP equal to weapon's damage bonus
 - Pistol — Can be used in close combat
 - Precise — +1 SL on critical hits
@@ -235,7 +238,14 @@ Format: { "name": "Quality Name", "value": N } or just { "name": "Quality Name" 
 - Slow — -10 Initiative for combat order
 - Tiring — Cannot use special abilities after first round
 - Undamaging — Minimum 1 damage, max is SB
+- Unbalanced — Penalty to defensive use
 - Wrap — (also a flaw for some weapons)
+
+### MAGICAL KEYWORD RULE — CRITICAL
+If the user describes a weapon as "magic", "magical", "enchanted", "runic", "blessed", or "imbued",
+ALWAYS add {"name":"magical"} to the qualities array. This is required for the weapon to affect
+creatures that are immune to non-magical weapons (daemons, spirits, ethereal creatures, etc.).
+This applies to ALL magical weapons regardless of what other effects they have.
 
 ### Base qualities/flaws by weapon type (MUST be included — from canonical WFRP4e data):
 
