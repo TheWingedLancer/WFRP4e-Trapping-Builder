@@ -45,6 +45,13 @@ export async function createWorldItem(itemData) {
 
 /**
  * Create an owned Item on an Actor from parsed AI data.
+ *
+ * For consumables: creates a world-level Item with the effect attached,
+ * then adds a COPY of just the item data (with embedded effects) to the actor.
+ * The world item is then deleted (it was just a staging area).
+ *
+ * For non-consumables: creates directly on the actor with effects.
+ *
  * @param {Actor} actor - Target actor
  * @param {object} itemData - Parsed item data from AI
  * @returns {Promise<Item>} The created owned Item
@@ -52,11 +59,28 @@ export async function createWorldItem(itemData) {
 export async function createActorItem(actor, itemData) {
   await _resolveItemIcon(itemData);
   const consumable = _isConsumable(itemData);
+
+  if (consumable) {
+    // Build the item + effect as a world item (effects are dormant on world items)
+    const worldItem = await createWorldItem(itemData);
+
+    // Serialize the world item including its embedded effects
+    const fullData = worldItem.toObject();
+
+    // Delete the staging world item
+    await worldItem.delete();
+
+    // Create on the actor from the serialized data
+    const [ownedItem] = await actor.createEmbeddedDocuments("Item", [fullData]);
+    return ownedItem;
+  }
+
+  // Non-consumable: create directly on actor
   const { effects, ...coreData } = itemData;
   const [item] = await actor.createEmbeddedDocuments("Item", [coreData]);
 
   if (effects?.length) {
-    await _createEffects(item, effects, consumable);
+    await _createEffects(item, effects, false);
   }
 
   return item;
@@ -88,12 +112,17 @@ async function _createEffects(item, effectsData, isConsumable) {
     if (isConsumable) {
       // CONSUMABLE PATH: The consumables-with-effects module handles everything.
       // - transfer MUST be false (set above)
-      // - Do NOT include system.transferData (causes WFRP4e to auto-apply)
-      // - Do NOT include system.scriptData (not needed for consumables)
+      // - Set transferData.type to "other" so WFRP4e's effect engine does NOT apply it
       // - Only include duration if the user explicitly requested timed effects
       effectObj.flags = {
-        wfrp4e: { effectApplication: "actor" },
         [CONSUMABLE_MODULE_ID]: { consumableEffect: true },
+      };
+      effectObj.system = {
+        transferData: {
+          type: "other",
+          documentType: "Actor",
+          equipTransfer: false,
+        },
       };
       if (efData.duration?.rounds) {
         effectObj.duration = { rounds: efData.duration.rounds };
