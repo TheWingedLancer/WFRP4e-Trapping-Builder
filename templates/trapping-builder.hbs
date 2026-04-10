@@ -1,0 +1,171 @@
+<div class="trapping-builder-body">
+  {{!-- Input Section --}}
+  <section class="tb-input-section">
+    <label class="tb-label" for="tb-description">
+      <i class="fas fa-scroll"></i> Describe Your Trapping
+    </label>
+    <textarea
+      id="tb-description"
+      class="tb-textarea"
+      placeholder="{{localize 'TRAPPING_BUILDER.InputPlaceholder'}}"
+      rows="4"
+    >{{description}}</textarea>
+
+    <div class="tb-controls">
+      <button type="button" class="tb-btn tb-btn-generate" data-action="generate" {{#if generating}}disabled{{/if}}>
+        {{#if generating}}
+          <i class="fas fa-spinner fa-spin"></i>
+          {{localize "TRAPPING_BUILDER.Generating"}}
+        {{else}}
+          <i class="fas fa-wand-magic-sparkles"></i>
+          {{localize "TRAPPING_BUILDER.Generate"}}
+        {{/if}}
+      </button>
+
+      {{#if preview}}
+      <button type="button" class="tb-btn tb-btn-reset" data-action="reset">
+        <i class="fas fa-undo"></i>
+        {{localize "TRAPPING_BUILDER.Reset"}}
+      </button>
+      {{/if}}
+    </div>
+  </section>
+
+  {{!-- Error display --}}
+  {{#if error}}
+  <section class="tb-error">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>{{error}}</span>
+  </section>
+  {{/if}}
+
+  {{!-- Preview Section --}}
+  {{#if preview}}
+  <section class="tb-preview-section">
+    <h3 class="tb-section-title">
+      <i class="fas fa-eye"></i> {{localize "TRAPPING_BUILDER.Preview"}}
+    </h3>
+
+    <div class="tb-preview-card">
+      <div class="tb-preview-header">
+        <img class="tb-preview-icon" src="{{preview.img}}" alt="{{preview.name}}" />
+        <div class="tb-preview-title">
+          <input type="text" id="tb-item-name" class="tb-name-input" value="{{preview.name}}" placeholder="Item Name" />
+          <span class="tb-preview-type tb-badge">{{preview.type}}</span>
+        </div>
+      </div>
+
+      {{#if preview.system.description.value}}
+      <div class="tb-preview-description">
+        {{{preview.system.description.value}}}
+      </div>
+      {{/if}}
+
+      {{!-- Item type details --}}
+      {{#if preview.weaponDetails}}
+      <div class="tb-preview-stats">
+        <span class="tb-stat"><strong>Group:</strong> {{preview.weaponDetails.group}}</span>
+        <span class="tb-stat"><strong>Damage:</strong> +{{preview.weaponDetails.damage}}</span>
+        <span class="tb-stat"><strong>Reach:</strong> {{preview.weaponDetails.reach}}</span>
+      </div>
+      {{/if}}
+
+      {{#if preview.armourDetails}}
+      <div class="tb-preview-stats">
+        <span class="tb-stat"><strong>AP:</strong> {{preview.armourDetails.ap}}</span>
+        {{#if preview.armourDetails.penalty}}
+        <span class="tb-stat"><strong>Penalty:</strong> {{preview.armourDetails.penalty}}</span>
+        {{/if}}
+      </div>
+      {{/if}}
+
+      {{!-- Effects --}}
+      {{#if preview.effects.length}}
+      <div class="tb-effects-list">
+        <h5><i class="fas fa-bolt"></i> {{localize "TRAPPING_BUILDER.Effects"}} ({{preview.effects.length}})</h5>
+        {{#each preview.effects}}
+        <div class="tb-effect-row">
+          <div class="tb-effect-header">
+            <span class="tb-effect-name">{{this.name}}</span>
+            {{#each this.scripts}}
+            <span class="tb-badge tb-badge-trigger">{{this.trigger}}</span>
+            {{/each}}
+          </div>
+          {{#each this.scripts}}
+          <code class="tb-effect-script">{{this.preview}}</code>
+          {{/each}}
+        </div>
+        {{/each}}
+      </div>
+      {{else}}
+      <p class="tb-no-effects">{{localize "TRAPPING_BUILDER.NoEffects"}}</p>
+      {{/if}}
+    </div>
+
+    {{!-- Random roll buttons — contextual by item type --}}
+    {{#if showRandomButtons}}
+    <div class="tb-random-section">
+      <h5 class="tb-section-subtitle"><i class="fas fa-dice-d20"></i> Random Enchantments (Archives of the Empire Vol II)</h5>
+      <div class="tb-random-buttons">
+        {{#if isWeapon}}
+        <button type="button" class="tb-btn tb-btn-roll" data-action="rollWeaponMagic">
+          <i class="fas fa-dice-d20"></i> Roll Magical Weapon Quality
+        </button>
+        {{/if}}
+        {{#if isArmour}}
+        <button type="button" class="tb-btn tb-btn-roll" data-action="rollArmourMagic">
+          <i class="fas fa-dice-d20"></i> Roll Magical Armour Quality
+        </button>
+        <button type="button" class="tb-btn tb-btn-roll" data-action="rollArmourSize">
+          <i class="fas fa-dice-d20"></i> Roll Random Armour Size
+        </button>
+        {{/if}}
+        {{#if isShield}}
+        <button type="button" class="tb-btn tb-btn-roll" data-action="rollShieldMagic">
+          <i class="fas fa-dice-d20"></i> Roll Magical Shield Quality
+        </button>
+        {{/if}}
+      </div>
+    </div>
+    {{/if}}
+
+    {{!-- Roll results --}}
+    {{#if rollResults.length}}
+    <div class="tb-roll-results">
+      <h5 class="tb-section-subtitle"><i class="fas fa-scroll"></i> Rolled Enchantments</h5>
+      {{#each rollResults}}
+      <div class="tb-roll-result">
+        <div class="tb-roll-header">
+          <span class="tb-badge tb-badge-roll">d100: {{this.roll}}</span>
+          <strong>{{this.name}}</strong>
+        </div>
+        <p class="tb-roll-description">{{this.description}}</p>
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    {{!-- Action buttons --}}
+    <div class="tb-actions">
+      <button type="button" class="tb-btn tb-btn-create" data-action="createWorld">
+        <i class="fas fa-globe"></i>
+        {{localize "TRAPPING_BUILDER.CreateItem"}}
+      </button>
+
+      {{#if actors.length}}
+      <div class="tb-actor-row">
+        <select id="tb-actor-select" class="tb-actor-select">
+          {{#each actors}}
+          <option value="{{this.id}}">{{this.name}}</option>
+          {{/each}}
+        </select>
+        <button type="button" class="tb-btn tb-btn-actor" data-action="createActor">
+          <i class="fas fa-user-plus"></i>
+          {{localize "TRAPPING_BUILDER.AddToActor"}}
+        </button>
+      </div>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+</div>

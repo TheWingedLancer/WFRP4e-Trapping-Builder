@@ -1,0 +1,45 @@
+name: Release Module
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Update version in module.json
+        run: |
+          jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' module.json > module.tmp.json
+          mv module.tmp.json module.json
+
+      - name: Build release zip
+        run: |
+          zip -r wfrp4e-trapping-builder.zip \
+            module.json \
+            scripts/ \
+            styles/ \
+            templates/ \
+            languages/ \
+            LICENSE \
+            CHANGELOG.md \
+            README.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            module.json
+            wfrp4e-trapping-builder.zip
+          generate_release_notes: true
