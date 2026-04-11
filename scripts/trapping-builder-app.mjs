@@ -251,12 +251,16 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     // Add "magical" quality if not already present
     this.#ensureQuality("magical");
 
-    // Add any qualities from the roll results
+    // Add any qualities and effects from the roll results
     for (const result of results) {
       if (result.qualities) {
         for (const q of result.qualities) {
           this.#ensureQuality(q.name, q.value);
         }
+      }
+      // Create Active Effect from effectData if present
+      if (result.effectData) {
+        this.#addEffectFromRollData(result.name, result.effectData);
       }
     }
 
@@ -304,6 +308,11 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
         }
       }
 
+      // Create Active Effect from effectData if present
+      if (result.effectData) {
+        this.#addEffectFromRollData(result.name, result.effectData);
+      }
+
       this.#appendDescription(`<p><strong>${result.name}:</strong> ${result.description}</p>`);
     }
 
@@ -322,6 +331,11 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
       for (const q of result.qualities) {
         this.#ensureQuality(q.name, q.value);
       }
+    }
+
+    // Create Active Effect from effectData if present
+    if (result.effectData) {
+      this.#addEffectFromRollData(result.name, result.effectData);
     }
 
     this.#appendDescription(`<p><strong>${result.name}:</strong> ${result.description}</p>`);
@@ -433,6 +447,55 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
       this.#parsedData.system.description = { value: "" };
     }
     this.#parsedData.system.description.value += html;
+  }
+
+  /**
+   * Convert effectData from a random table result into a full WFRP4e Active Effect
+   * and append it to parsedData.effects so the item factory will create it.
+   *
+   * @param {string} effectName - Name for the Active Effect
+   * @param {object} effectData - { changes?: [], scriptData?: [] }
+   */
+  #addEffectFromRollData(effectName, effectData) {
+    if (!effectData) return;
+    if (!this.#parsedData) return;
+
+    // Ensure effects array exists
+    if (!this.#parsedData.effects) this.#parsedData.effects = [];
+
+    const effect = {
+      name: effectName,
+      transfer: true,
+      disabled: false,
+      changes: effectData.changes ?? [],
+      flags: {},
+      system: {
+        transferData: {
+          type: "document",
+          documentType: "Actor",
+          equipTransfer: true,
+        },
+        scriptData: [],
+      },
+    };
+
+    // Add scriptData entries
+    if (effectData.scriptData?.length) {
+      for (const sd of effectData.scriptData) {
+        const entry = {
+          label: sd.label ?? effectName,
+          trigger: sd.trigger,
+          script: sd.script,
+        };
+        // Some triggers (like "dialog") have additional options
+        if (sd.options) {
+          entry.options = sd.options;
+        }
+        effect.system.scriptData.push(entry);
+      }
+    }
+
+    this.#parsedData.effects.push(effect);
   }
 }
 

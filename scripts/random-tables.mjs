@@ -1,152 +1,233 @@
 // ===========================================================================
 // Random Tables – Magical Weapon & Armour Qualities + Armour Size
-// From Archives of the Empire Vol II
+// From Archives of the Empire Vol II (canonical d100 ranges from the PDF)
+//
+// Each entry includes:
+//   - range: d100 range
+//   - name: enchantment name
+//   - description: flavour text
+//   - qualities: weapon/armour qualities to add [{name, value?}]
+//   - effectData: WFRP4e Active Effect data to create on the item
+//     - changes: Foundry changes array for simple stat mods
+//     - scriptData: WFRP4e script triggers for complex behavior
 // ===========================================================================
 
-/**
- * Roll a d100 (1-100)
- */
-function d100() {
-  return Math.floor(Math.random() * 100) + 1;
-}
-
-/**
- * Roll a dN
- */
-function dN(n) {
-  return Math.floor(Math.random() * n) + 1;
-}
+function d100() { return Math.floor(Math.random() * 100) + 1; }
+function dN(n) { return Math.floor(Math.random() * n) + 1; }
 
 // ---------------------------------------------------------------------------
 // MAGICAL WEAPON QUALITIES (d100) — Archives of the Empire Vol II, p58-60
 // ---------------------------------------------------------------------------
 const MAGICAL_WEAPON_TABLE = [
   { range: [1, 20], name: "Touched by the Winds",
-    description: "The weapon has petty enchantments cast upon it. Beyond damaging creatures immune to non-magical attacks it has no particular ability. If ranged, this applies to its ammunition.",
-    effects: [] },
+    description: "The weapon has petty enchantments. Beyond damaging creatures immune to non-magical attacks it has no particular ability.",
+    qualities: [], effectData: null },
+
   { range: [21, 24], name: "Wreathed in Shadow",
-    description: "The blade seems insubstantial and ghostly. Any target hit by the weapon receives no benefit from non-magical armour.",
-    effects: [] },
+    description: "The blade seems insubstantial and ghostly. Any target hit receives no benefit from non-magical armour.",
+    qualities: [],
+    effectData: { scriptData: [{ label: "Wreathed in Shadow", trigger: "applyDamage",
+      script: "if (!args.opposedTest.result.weapon?.system?.qualities?.value?.some(q => q.name === 'magical')) return; args.totalWoundLoss = args.totalWoundLoss; // Flavour: non-magical AP ignored handled by GM" }] } },
+
   { range: [25, 28], name: "Alight with Flame",
     description: "Once drawn the weapon bursts into searing flame. If the wielder hits a flammable target, the target suffers one Ablaze Condition.",
-    effects: [] },
-  { range: [29, 31], name: "Hoarfrost Blade",
-    description: "The weapon is supernaturally cold. Any target hit suffers a Stunned Condition in addition to other effects.",
-    effects: [] },
-  { range: [32, 34], name: "Crackling with Lightning",
-    description: "The weapon crackles with arcs of electricity. The weapon has the Damaging Quality and inflicts one additional Wound on any hit.",
-    qualities: [{"name":"damaging"}] },
-  { range: [35, 37], name: "Of the Righteous",
-    description: "A weapon imbued with sacred power. The wielder gains +10 to WS or BS and the weapon gains the Impale Quality.",
-    qualities: [{"name":"impale"}] },
-  { range: [38, 40], name: "Of Venomous Spite",
-    description: "The weapon drips with a magical venom. Any target wounded by the weapon must pass an Average (+20) Endurance Test or gain the Poisoned Condition.",
-    effects: [] },
-  { range: [41, 43], name: "Spirit-Binding",
-    description: "The weapon is bound with a minor spirit. The wielder may reroll one failed attack per combat round.",
-    effects: [] },
-  { range: [44, 46], name: "Of Sudden Swiftness",
-    description: "Enchantments allow the wielder to strike with preternatural speed. The weapon gains the Fast Quality and the wielder gains +1 Initiative.",
-    qualities: [{"name":"fast"}] },
-  { range: [47, 49], name: "Of Sureness",
-    description: "The weapon is enchanted to fly true. The wielder benefits from the Talents: Accurate Shot, Sharpshooter, and Sniper.",
-    effects: [] },
-  { range: [50, 51], name: "Of Might",
-    description: "The wielder's attacks are imbued with tremendous force. The weapon has the Impact Quality.",
-    qualities: [{"name":"impact"}] },
+    qualities: [],
+    effectData: { scriptData: [{ label: "Alight with Flame", trigger: "applyDamage",
+      script: "if (args.totalWoundLoss > 0) { args.actor.addCondition('ablaze'); this.script.notification('Target set Ablaze!'); }" }] } },
+
+  { range: [29, 31], name: "Dolorous",
+    description: "Death magic permeates the weapon, filling foes with fright. The wielder counts as causing Fear (1).",
+    qualities: [],
+    effectData: { scriptData: [{ label: "Dolorous — Fear (1)", trigger: "prepareData",
+      script: "// Fear (1) — GM should apply Fear psychology to the wielder" }] } },
+
+  { range: [32, 35], name: "Of Leaping Silver Wroth",
+    description: "Expert balance and surprising lightness. A melee weapon has the Fast Quality. A ranged weapon grants +10 Initiative in combat.",
+    qualities: [{"name":"fast"}],
+    effectData: { changes: [{ key: "system.characteristics.i.modifier", mode: 2, value: "10" }] } },
+
+  { range: [36, 39], name: "Carved of Rage",
+    description: "Animalistic fury fills the wielder whenever this weapon is drawn. The wielder becomes subject to Frenzy.",
+    qualities: [],
+    effectData: { scriptData: [{ label: "Carved of Rage — Frenzy", trigger: "prepareData",
+      script: "// Wielder is subject to Frenzy when weapon is drawn — GM should apply Frenzy psychology" }] } },
+
+  { range: [40, 43], name: "Envigoured",
+    description: "The life-giving wind of Ghyran courses through the weapon. The wielder ignores Fatigue Conditions whilst fighting. The weapon has the Unbreakable Quality.",
+    qualities: [{"name":"unbreakable"}],
+    effectData: { scriptData: [{ label: "Envigoured — Ignore Fatigue", trigger: "dialog",
+      script: "// Wielder ignores Fatigue Conditions while fighting with this weapon" }] } },
+
+  { range: [44, 47], name: "Entwined with Fate",
+    description: "Celestial magics imbue the weapon with prognosticative abilities. At the start of each round of combat, the wielder gains one Advantage.",
+    qualities: [],
+    effectData: { scriptData: [{ label: "Entwined with Fate — +1 Advantage per round", trigger: "startTurn",
+      script: "this.actor.system.status.advantage.value += 1; this.script.notification('Gained 1 Advantage from Entwined with Fate');" }] } },
+
+  { range: [48, 51], name: "Of Rigor Wroth",
+    description: "Light magic makes a paragon of the wielder. Melee: gains Strike Mighty Blow, Strike to Injure, Strike to Stun. Ranged: gains Fast Shot, Sharpshooter, Sniper.",
+    qualities: [],
+    effectData: null },
+
   { range: [52, 54], name: "Of Stalwart Sorcery",
-    description: "These weapons strike true. The weapon has the Precise Quality.",
-    qualities: [{"name":"precise"}] },
+    description: "These weapons strike true as Verena. The weapon has the Precise Quality.",
+    qualities: [{"name":"precise"}],
+    effectData: null },
+
   { range: [55, 57], name: "Bewildering",
     description: "Powerful enchantments of bemusement and misdirection. Anyone wounded by the weapon gains the Surprised Condition.",
-    effects: [] },
+    qualities: [],
+    effectData: { scriptData: [{ label: "Bewildering — Surprised", trigger: "applyDamage",
+      script: "if (args.totalWoundLoss > 0) { args.actor.addCondition('surprised'); this.script.notification('Target is Surprised!'); }" }] } },
+
   { range: [58, 60], name: "Of Bold Brass",
     description: "The weapon's bearer is filled with vim, is immune to Fear, and enjoys +2 SL bonus to resist Terror.",
-    effects: [] },
+    qualities: [],
+    effectData: { scriptData: [{ label: "Of Bold Brass — Fear Immunity", trigger: "dialog",
+      script: "if (args.prefillModifiers?.difficulty?.includes('Terror') || args.prefillModifiers?.difficulty?.includes('Fear')) { args.fields.slBonus += 2; }",
+      options: { dialog: { hideScript: "", activateScript: "return true;", submissionScript: "" } } }] } },
+
   { range: [61, 63], name: "Of the Wolf's Wide Jaws",
     description: "Favoured Ulrican weapons with wolf motifs. The weapon has the Damaging Quality.",
-    qualities: [{"name":"damaging"}] },
+    qualities: [{"name":"damaging"}],
+    effectData: null },
+
   { range: [64, 66], name: "Of Deft and Cunning",
-    description: "Often created with Myrmidian experts. The wielder benefits from +20 WS or BS, as appropriate.",
-    effects: [] },
+    description: "Myrmidian-crafted weapons of exquisite precision. The wielder benefits from +20 WS or BS, as appropriate.",
+    qualities: [],
+    effectData: { changes: [{ key: "system.characteristics.ws.modifier", mode: 2, value: "20" }] } },
+
   { range: [67, 69], name: "Of Salt and Brine",
-    description: "Blessed by priests of Manann. The bearer may make a free Action in the first Round of any combat. The weapon also has the Fast Quality.",
-    qualities: [{"name":"fast"}] },
+    description: "Blessed by priests of Manann. The bearer may make a free Action in the first Round of combat. The weapon has the Fast Quality.",
+    qualities: [{"name":"fast"}],
+    effectData: null },
+
   { range: [70, 72], name: "Of Grisly Wounds",
-    description: "Deathly enchantments ensure that wounds are severe. The weapon has the Damaging Quality.",
-    qualities: [{"name":"damaging"}] },
+    description: "Deathly enchantments ensure wounds are severe. The weapon has the Damaging Quality.",
+    qualities: [{"name":"damaging"}],
+    effectData: null },
+
   { range: [73, 75], name: "Of Tooth and Claw",
-    description: "Creatures with the Bestial Trait recognise something of themselves in this weapon. Creatures with the Bestial Trait are subject to Fear (1) when the weapon is drawn.",
-    effects: [] },
-  { range: [76, 78], name: "Of Enduring War",
-    description: "The weapon is remarkably hard to destroy. It has the Unbreakable Quality.",
-    qualities: [{"name":"unbreakable"}] },
-  { range: [79, 81], name: "Of the Mage-Hunter",
-    description: "These weapons are the bane of spellcasters. If the weapon wounds a spellcaster, the target must pass a Hard (-20) Willpower Test or be unable to cast spells for 1d10 rounds.",
-    effects: [] },
-  { range: [82, 84], name: "Of Festering Wounds",
-    description: "All Wounds the weapon inflicts are Festering Wounds.",
-    effects: [] },
+    description: "Creatures with the Bestial Trait must pass a Difficult (-10) Willpower Test before attacking the wielder.",
+    qualities: [],
+    effectData: null },
+
+  { range: [76, 78], name: "Of Deepest Banishing",
+    description: "Anathema to Daemons and Ethereal Undead. The wielder counts as having three additional Advantage when determining Unstable Trait effects.",
+    qualities: [],
+    effectData: null },
+
+  { range: [79, 81], name: "Of Undue Substance",
+    description: "Strange properties of density and mass. The weapon has the Pummel and Hack Qualities.",
+    qualities: [{"name":"pummel"},{"name":"hack"}],
+    effectData: null },
+
+  { range: [82, 84], name: "Of Languishing Death",
+    description: "Morr calls to those wounded by this weapon. All Wounds the weapon inflicts are Festering Wounds.",
+    qualities: [],
+    effectData: null },
+
   { range: [85, 87], name: "Of Keenest Edge",
-    description: "The tip and edges are kept magically keen. The weapon has the Hack, Impale, and Penetrating Qualities.",
-    qualities: [{"name":"hack"},{"name":"impale"},{"name":"penetrating"}] },
+    description: "Magically keen tip and edges. The weapon has the Hack, Impale, and Penetrating Qualities.",
+    qualities: [{"name":"hack"},{"name":"impale"},{"name":"penetrating"}],
+    effectData: null },
+
   { range: [88, 90], name: "Of Bane",
-    description: "Made with enchantments that increase deadliness to a given enemy. If it deals damage to a particular type of creature, it inflicts twice the number of Wounds. Roll on the Random Creature Table to determine the affected creature.",
-    effects: [] },
+    description: "Enchantments increase deadliness to a given enemy. If it deals damage to a particular creature type, it inflicts twice the number of Wounds. Roll on the Random Creature Table to determine the affected creature.",
+    qualities: [],
+    effectData: null },
+
   { range: [91, 92], name: "Of Ceaseless Cleaving",
     description: "Powerful enchantments guide the weapon through flesh and bone. If a hit deals Damage, it inflicts an additional two Wounds.",
-    effects: [] },
+    qualities: [],
+    effectData: { scriptData: [{ label: "Of Ceaseless Cleaving — +2 Wounds", trigger: "applyDamage",
+      script: "args.totalWoundLoss += 2; this.script.notification('Ceaseless Cleaving: +2 Wounds!');" }] } },
+
   { range: [93, 94], name: "Of Leaping Gold",
     description: "Handles like a feather, lands like a block of lead. The weapon has the Fast, Penetrating, and Precise Qualities.",
-    qualities: [{"name":"fast"},{"name":"penetrating"},{"name":"precise"}] },
+    qualities: [{"name":"fast"},{"name":"penetrating"},{"name":"precise"}],
+    effectData: null },
+
   { range: [95, 96], name: "Of Grievous Injury",
-    description: "Injuries inflicted by this weapon are cruel and severe. All Critical Wounds caused by this weapon have +20 added to the result.",
-    effects: [] },
-  { range: [97, 98], name: "Of Spell-Eating",
-    description: "The weapon absorbs magical energy. The wielder gains the Magic Resistance Talent at the appropriate level.",
-    effects: [] },
-  { range: [99, 100], name: "Artefact of Power",
-    description: "This is a truly mighty weapon. Roll twice more on this table and combine the results. If this result is rolled again, the weapon has three abilities.",
-    effects: [], reroll: 2 },
+    description: "Injuries are cruel and severe. Whenever the wielder rolls on the Critical Injuries Chart they can reverse the numbers and apply whichever is most damaging.",
+    qualities: [],
+    effectData: null },
+
+  { range: [97, 98], name: "Of Form Mercurial",
+    description: "The weapon morphs according to the wielder's movements. Each round the wielder may choose from: Fast, Hack, Impale, Penetrating, and Precise.",
+    qualities: [],
+    effectData: null },
+
+  { range: [99, 99], name: "Hoarfrost Blade",
+    description: "So much as a nick can prove fatal. If a hit deals Damage, it inflicts double the number of Wounds, plus four additional Wounds.",
+    qualities: [],
+    effectData: { scriptData: [{ label: "Hoarfrost Blade — Double Wounds +4", trigger: "applyDamage",
+      script: "args.totalWoundLoss = (args.totalWoundLoss * 2) + 4; this.script.notification('Hoarfrost Blade: Wounds doubled +4!');" }] } },
+
+  { range: [100, 100], name: "Legendary Weapon",
+    description: "Roll twice more on this table. Maximum of five abilities; duplicates are not cumulative.",
+    qualities: [], effectData: null, reroll: 2 },
 ];
 
 // ---------------------------------------------------------------------------
-// MAGICAL ARMOUR QUALITIES (d100) — Archives of the Empire Vol II, p62-65
+// MAGICAL ARMOUR QUALITIES (d100) — Archives of the Empire Vol II, p63
 // ---------------------------------------------------------------------------
 const MAGICAL_ARMOUR_TABLE = [
   { range: [1, 32], name: "Magical Armour",
     description: "The armour is enchanted, but has no unusual ability beyond protecting against attacks that ignore non-magical armour.",
-    effects: [] },
+    qualities: [], effectData: null },
+
   { range: [33, 38], name: "Gromril Armour",
-    description: "The armour is made of Gromril, and enjoys all the benefits of that material. It bears Runes identifying the Dwarf Hold to which the suit belongs by right.",
-    effects: [], material: "gromril" },
+    description: "The armour is made of Gromril, enjoying all the benefits of that material. It bears Runes identifying the Dwarf Hold to which the suit belongs.",
+    qualities: [], effectData: null, material: "gromril" },
+
   { range: [39, 42], name: "Ithilmar Armour",
-    description: "The armour is made of Ithilmar, and enjoys all the benefits of that material. Eltharin inscription identifies its original owner.",
-    effects: [], material: "ithilmar" },
+    description: "The armour is made of Ithilmar. Eltharin inscription identifies its original owner.",
+    qualities: [], effectData: null, material: "ithilmar" },
+
   { range: [43, 44], name: "Gifted Armour",
-    description: "One of the very rare suits of Gromril or Ithilmar armour made as a gift, sized suitably for a non-Dwarf or non-Elf recipient.",
-    effects: [] },
+    description: "A rare suit of Gromril or Ithilmar made as a gift, sized for a non-Dwarf or non-Elf recipient.",
+    qualities: [], effectData: null },
+
   { range: [45, 56], name: "Warded Armour",
     description: "Protective sigils are etched into the armour. The wearer ignores the first Critical Hit they receive each day.",
-    effects: [] },
+    qualities: [],
+    effectData: { scriptData: [{ label: "Warded — Ignore First Critical", trigger: "preTakeDamage",
+      script: "// GM: The wearer ignores the first Critical Hit each day" }] } },
+
   { range: [57, 64], name: "Spectral Armour",
-    description: "The armour is partially translucent and seems to shimmer. Opponents in melee suffer -10 WS when attacking the wearer.",
-    effects: [] },
+    description: "The armour is partially translucent and shimmers. Opponents in melee suffer -10 WS when attacking the wearer.",
+    qualities: [],
+    effectData: null },
+
   { range: [65, 76], name: "Dazzling Armour",
-    description: "In daylight or near a strong light source, opponents in melee with the wearer must pass an Average (+20) Agility Test at the start of each Round or suffer one Blinded Condition. Full suit required.",
-    effects: [] },
+    description: "In daylight or near strong light, opponents in melee must pass an Average (+20) Agility Test at the start of each Round or suffer one Blinded Condition. Full suit required.",
+    qualities: [],
+    effectData: null },
+
   { range: [77, 88], name: "Trickster's Armour",
-    description: "Artificers consulted with followers of Ranald to imbue the armour with protective wards. If an attack hits an area protected by this armour, roll 1d10. On a roll of a 10, the wearer ignores the hit.",
-    effects: [] },
+    description: "If an attack hits an area protected by this armour, roll 1d10. On a 10, the wearer ignores the hit.",
+    qualities: [],
+    effectData: { scriptData: [{ label: "Trickster's Armour — 10% Ignore Hit", trigger: "preTakeDamage",
+      script: "let roll = Math.floor(Math.random() * 10) + 1; if (roll === 10) { args.totalWoundLoss = 0; this.script.notification(\"Trickster's Armour deflects the blow! (rolled \" + roll + \")\"); } else { this.script.notification(\"Trickster's Armour: rolled \" + roll + \" (need 10)\"); }" }] } },
+
   { range: [89, 96], name: "Armour of Resilience",
-    description: "Powerful enchantments of Chamon ensure that the living flesh of the wearer is as strong as steel. The wearer benefits from +5 Toughness. Full suit required.",
-    effects: [] },
+    description: "Powerful Chamon enchantments make the wearer's flesh as strong as steel. +5 Toughness. Full suit required.",
+    qualities: [],
+    effectData: { changes: [
+      { key: "system.characteristics.t.modifier", mode: 2, value: "5" },
+      { key: "system.characteristics.t.calculationBonusModifier", mode: 2, value: "-1" }
+    ] } },
+
   { range: [97, 99], name: "Armour of Fortune",
-    description: "The Armour of Fortune misdirects blows that would otherwise land. If an attack hits an area protected by this armour, roll 1d10. On a roll of a 9 or 10, the wearer ignores the hit.",
-    effects: [] },
+    description: "Misdirects blows. If an attack hits a protected area, roll 1d10. On 9 or 10, the wearer ignores the hit.",
+    qualities: [],
+    effectData: { scriptData: [{ label: "Armour of Fortune — 20% Ignore Hit", trigger: "preTakeDamage",
+      script: "let roll = Math.floor(Math.random() * 10) + 1; if (roll >= 9) { args.totalWoundLoss = 0; this.script.notification('Armour of Fortune deflects the blow! (rolled ' + roll + ')'); } else { this.script.notification('Armour of Fortune: rolled ' + roll + ' (need 9+)'); }" }] } },
+
   { range: [100, 100], name: "Legendary Armour",
-    description: "This is truly legendary armour. Roll twice more on this table. Maximum of five abilities; duplicates are not cumulative.",
-    effects: [], reroll: 2 },
+    description: "Roll twice more on this table. Maximum of five abilities; duplicates are not cumulative.",
+    qualities: [], effectData: null, reroll: 2 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -154,23 +235,31 @@ const MAGICAL_ARMOUR_TABLE = [
 // ---------------------------------------------------------------------------
 const MAGICAL_SHIELD_TABLE = [
   { range: [1, 45], name: "Magical Shield",
-    description: "The shield is magical, but has no further ability beyond protecting against attacks that ignore non-magical armour.",
-    effects: [] },
+    description: "The shield is magical, but has no further ability.",
+    qualities: [], effectData: null },
+
   { range: [46, 56], name: "Ithilmar Shield",
-    description: "These shields are very light. Reduce Encumbrance by 1 to a minimum of 0.",
-    effects: [] },
+    description: "Very light. Reduce Encumbrance by 1 to a minimum of 0.",
+    qualities: [], effectData: null },
+
   { range: [57, 68], name: "Gromril Shield",
-    description: "Gromril shields provide +1 to the Shield Quality. So, a large Gromril shield counts as having the Shield 4 Quality.",
-    effects: [] },
+    description: "Provides +1 to the Shield Quality. A large Gromril shield has Shield 4.",
+    qualities: [], effectData: null },
+
   { range: [69, 75], name: "Shield of Ptolos",
-    description: "Enchantments misdirect projectiles. Shields of Ptolos provide +2 to the Shield Quality when defending against a missile weapon.",
-    effects: [] },
+    description: "Enchantments misdirect projectiles. +2 to the Shield Quality when defending against missile weapons.",
+    qualities: [], effectData: null },
+
   { range: [76, 88], name: "Spell Shield",
-    description: "Enchanted to deflect magic missiles. The bearer may attempt to dispel any magic missile spell that targets them, using Language (Magick) Skill of 30.",
-    effects: [] },
+    description: "Enchanted to deflect magic missiles. The bearer may attempt to dispel any magic missile spell targeting them (Language (Magick) 30).",
+    qualities: [], effectData: null },
+
   { range: [89, 100], name: "Charmed Shield",
-    description: "Enchantments imbue this shield with an enhanced ability to deflect incoming attacks. The bearer benefits from +3 SL to Melee Tests they make when opposing incoming attacks.",
-    effects: [] },
+    description: "Bearer benefits from +3 SL to Melee Tests when opposing incoming attacks.",
+    qualities: [],
+    effectData: { scriptData: [{ label: "Charmed Shield — +3 SL Defensive", trigger: "dialog",
+      script: "args.fields.slBonus += 3;",
+      options: { dialog: { hideScript: "", activateScript: "return args.defending;", submissionScript: "" } } }] } },
 ];
 
 // ---------------------------------------------------------------------------
@@ -199,7 +288,6 @@ const ARMOUR_PIECE_TABLE = [
 
 // ---------------------------------------------------------------------------
 // ARMOUR SIZE TABLE (d10) — Archives of the Empire Vol II, p62
-// Determines the species and height of the armour's original intended wearer.
 // ---------------------------------------------------------------------------
 const ARMOUR_SIZE_TABLE = [
   { roll: 1, species: "Human", height: "Exceedingly Short" },
@@ -218,28 +306,23 @@ const ARMOUR_SIZE_TABLE = [
 // Public API
 // ---------------------------------------------------------------------------
 
-/**
- * Look up a result from a table by d100 roll.
- */
 function _lookup(table, roll) {
   return table.find((entry) => roll >= entry.range[0] && roll <= entry.range[1]);
 }
 
 /**
  * Roll on the Magical Weapon Qualities table.
- * Returns an object with the roll, name, description, and any qualities to add.
- * Handles "Artefact of Power" rerolls.
+ * Handles "Legendary Weapon" rerolls.
+ * Returns array of results, each with roll, name, description, qualities, effectData.
  */
 export function rollMagicalWeaponQuality() {
   const results = [];
   let rolls = 1;
-
   while (rolls > 0) {
     rolls--;
     const roll = d100();
     const entry = _lookup(MAGICAL_WEAPON_TABLE, roll);
     if (!entry) continue;
-
     if (entry.reroll) {
       rolls += entry.reroll;
       results.push({ roll, name: entry.name, description: entry.description, note: `Roll ${entry.reroll} more times!` });
@@ -249,10 +332,10 @@ export function rollMagicalWeaponQuality() {
         name: entry.name,
         description: entry.description,
         qualities: entry.qualities ?? [],
+        effectData: entry.effectData ?? null,
       });
     }
   }
-
   return results;
 }
 
@@ -262,13 +345,11 @@ export function rollMagicalWeaponQuality() {
 export function rollMagicalArmourQuality() {
   const results = [];
   let rolls = 1;
-
   while (rolls > 0) {
     rolls--;
     const roll = d100();
     const entry = _lookup(MAGICAL_ARMOUR_TABLE, roll);
     if (!entry) continue;
-
     if (entry.reroll) {
       rolls += entry.reroll;
       results.push({ roll, name: entry.name, description: entry.description, note: `Roll ${entry.reroll} more times!` });
@@ -278,10 +359,11 @@ export function rollMagicalArmourQuality() {
         name: entry.name,
         description: entry.description,
         qualities: entry.qualities ?? [],
+        effectData: entry.effectData ?? null,
+        material: entry.material ?? null,
       });
     }
   }
-
   return results;
 }
 
@@ -291,22 +373,26 @@ export function rollMagicalArmourQuality() {
 export function rollMagicalShieldQuality() {
   const roll = d100();
   const entry = _lookup(MAGICAL_SHIELD_TABLE, roll);
-  return entry ? { roll, ...entry } : null;
+  if (!entry) return null;
+  return {
+    roll,
+    name: entry.name,
+    description: entry.description,
+    qualities: entry.qualities ?? [],
+    effectData: entry.effectData ?? null,
+  };
 }
 
 /**
- * Roll random armour piece (which piece) from the canonical table.
+ * Roll random armour piece and size.
  */
 export function rollRandomArmour() {
   const pieceRoll = d100();
   const piece = _lookup(ARMOUR_PIECE_TABLE, pieceRoll);
-
-  // Roll size (species + height) using d10
   const speciesRoll = dN(10);
   const heightRoll = dN(10);
   const species = ARMOUR_SIZE_TABLE.find((e) => e.roll === speciesRoll);
   const height = ARMOUR_SIZE_TABLE.find((e) => e.roll === heightRoll);
-
   return {
     pieceRoll,
     piece: piece?.piece ?? "Plate Breastplate",
