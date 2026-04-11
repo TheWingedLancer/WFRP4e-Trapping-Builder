@@ -90,9 +90,15 @@
             {{#each this.scripts}}
             <span class="tb-badge tb-badge-trigger">{{this.trigger}}</span>
             {{/each}}
+            {{#if this.changeCount}}
+            <span class="tb-badge tb-badge-trigger">changes ({{this.changeCount}})</span>
+            {{/if}}
           </div>
           {{#each this.scripts}}
           <code class="tb-effect-script">{{this.preview}}</code>
+          {{/each}}
+          {{#each this.changes}}
+          <code class="tb-effect-script">{{this}}</code>
           {{/each}}
         </div>
         {{/each}}

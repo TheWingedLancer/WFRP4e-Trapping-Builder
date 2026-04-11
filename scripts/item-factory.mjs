@@ -64,6 +64,7 @@ export async function createWorldItem(itemData) {
   _ensureMagicalQuality(itemData);
   const consumable = _isConsumable(itemData);
   const { effects, ...coreData } = itemData;
+  console.log("Trapping Builder | createWorldItem effects:", effects?.length ?? 0, effects);
   const item = await Item.create(coreData);
 
   if (effects?.length) {

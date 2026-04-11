@@ -496,6 +496,8 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     }
 
     this.#parsedData.effects.push(effect);
+    console.log("Trapping Builder | Added effect from roll:", effectName, effect);
+    console.log("Trapping Builder | Total effects on item:", this.#parsedData.effects.length);
   }
 }
 
