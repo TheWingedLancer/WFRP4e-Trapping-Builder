@@ -175,7 +175,14 @@ async function _createEffects(item, effectsData, isConsumable) {
     return effectObj;
   });
 
-  await item.createEmbeddedDocuments("ActiveEffect", effectDocs);
+  console.log("Trapping Builder | _createEffects called with", effectDocs.length, "effects:", JSON.stringify(effectDocs, null, 2));
+
+  try {
+    const created = await item.createEmbeddedDocuments("ActiveEffect", effectDocs);
+    console.log("Trapping Builder | ActiveEffects created:", created?.length, created);
+  } catch (err) {
+    console.error("Trapping Builder | Failed to create ActiveEffects:", err);
+  }
 }
 
 /**
