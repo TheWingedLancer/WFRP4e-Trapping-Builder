@@ -144,6 +144,9 @@
         <div class="tb-roll-header">
           <span class="tb-badge tb-badge-roll">d100: {{this.roll}}</span>
           <strong>{{this.name}}</strong>
+          <button type="button" class="tb-btn-delete-roll" data-action="deleteRollResult" data-index="{{@index}}" title="Remove this enchantment">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
         <p class="tb-roll-description">{{this.description}}</p>
       </div>

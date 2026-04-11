@@ -369,3 +369,21 @@
   margin: 4px 0 0;
   opacity: 0.85;
 }
+
+/* ----- Roll result delete button ----- */
+.trapping-builder-app .tb-btn-delete-roll {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.4;
+  padding: 2px 4px;
+  font-size: 11px;
+  line-height: 1;
+  transition: opacity 0.15s;
+}
+
+.trapping-builder-app .tb-btn-delete-roll:hover {
+  opacity: 1;
+  color: #8b1a1a;
+}

@@ -50,6 +50,7 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
       rollArmourMagic: TrappingBuilderApp.#onRollArmourMagic,
       rollArmourSize: TrappingBuilderApp.#onRollArmourSize,
       rollShieldMagic: TrappingBuilderApp.#onRollShieldMagic,
+      deleteRollResult: TrappingBuilderApp.#onDeleteRollResult,
     },
   };
 
@@ -417,6 +418,39 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.render();
   }
 
+  static #onDeleteRollResult(event, target) {
+    const index = parseInt(target.dataset.index, 10);
+    if (isNaN(index) || index < 0 || index >= this.#rollResults.length) return;
+
+    const removed = this.#rollResults[index];
+
+    // Remove the matching effect from parsedData.effects (by name)
+    if (this.#parsedData?.effects?.length && removed.name) {
+      const effIdx = this.#parsedData.effects.findIndex((e) => e.name === removed.name);
+      if (effIdx >= 0) this.#parsedData.effects.splice(effIdx, 1);
+    }
+
+    // Remove any qualities this roll added
+    if (removed.qualities?.length && this.#parsedData?.system?.qualities?.value) {
+      const quals = this.#parsedData.system.qualities.value;
+      for (const q of removed.qualities) {
+        const qIdx = quals.findIndex((existing) => existing.name === q.name);
+        if (qIdx >= 0) quals.splice(qIdx, 1);
+      }
+    }
+
+    // Remove the description text this roll appended
+    if (this.#parsedData?.system?.description?.value && removed.name) {
+      const desc = this.#parsedData.system.description.value;
+      const pattern = `<p><strong>${removed.name}:</strong> ${removed.description}</p>`;
+      this.#parsedData.system.description.value = desc.replace(pattern, "");
+    }
+
+    // Remove the roll result
+    this.#rollResults.splice(index, 1);
+    this.render();
+  }
+
   // -----------------------------------------------------------------------
   // Helpers
   // -----------------------------------------------------------------------
@@ -433,7 +467,8 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
   /** Ensure a quality exists on the item, adding it if missing */
   #ensureQuality(name, value) {
     if (!this.#parsedData?.system) return;
-    if (!this.#parsedData.system.qualities) this.#parsedData.system.qualities = { value: [] };
+    if (!this.#parsedData.system.qualities) this.#parsedData.system.qualities = {};
+    if (!Array.isArray(this.#parsedData.system.qualities.value)) this.#parsedData.system.qualities.value = [];
     const quals = this.#parsedData.system.qualities.value;
     if (!quals.some((q) => q.name === name)) {
       quals.push(value !== undefined ? { name, value } : { name });
