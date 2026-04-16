@@ -45,3 +45,25 @@ export function registerSettings() {
     requiresReload: false,
   });
 }
+
+// ===========================================================================
+// Sourcebook Module Detection
+// Maps features to the Foundry module IDs of the sourcebooks that contain them.
+// If a sourcebook module is not installed and active, its features are hidden.
+// ===========================================================================
+
+const SOURCEBOOK_MODULES = {
+  archivesVol2: "wfrp4e-archives2",
+  dwarfPlayersGuide: "wfrp4e-dwarfs",
+};
+
+/**
+ * Check if a sourcebook module is installed and active.
+ * @param {"archivesVol2"|"dwarfPlayersGuide"} sourcebook
+ * @returns {boolean}
+ */
+export function isSourcebookActive(sourcebook) {
+  const moduleId = SOURCEBOOK_MODULES[sourcebook];
+  if (!moduleId) return false;
+  return game.modules.get(moduleId)?.active ?? false;
+}

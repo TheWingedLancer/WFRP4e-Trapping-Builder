@@ -12,9 +12,12 @@ const CONSUMABLE_MODULE_ID = "wfrp4e-consumables-with-effects";
 async function _resolveItemIcon(itemData) {
   try {
     const icon = await resolveIcon(itemData);
-    if (icon) itemData.img = icon;
+    // Always use the resolved icon — never trust the AI's suggestion
+    // as it may reference paths that don't exist on Forge
+    itemData.img = icon || "icons/svg/item-bag.svg";
   } catch (e) {
-    console.warn("Trapping Builder | Icon resolution failed, keeping AI suggestion:", e);
+    console.warn("Trapping Builder | Icon resolution failed:", e);
+    itemData.img = "icons/svg/item-bag.svg";
   }
 }
 

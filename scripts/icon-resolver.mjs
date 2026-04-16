@@ -133,46 +133,18 @@ export async function resolveIcon(itemData) {
 }
 
 /**
- * Foundry built-in icon fallbacks by item type and subtype.
+ * Foundry built-in icon fallbacks by item type.
+ * Uses SVG icons that are guaranteed to exist in every Foundry install,
+ * including Forge-hosted instances where core webp icons may 404.
  */
 function _builtinFallback(type, itemData) {
-  const trappingType = itemData.system?.trappingType?.value;
-  const weaponGroup = itemData.system?.weaponGroup?.value;
-
   switch (type) {
-    case "weapon":
-      if (["bow", "longbow"].some((w) => weaponGroup?.includes(w))) return "icons/weapons/bows/longbow-leather-green.webp";
-      if (weaponGroup === "crossbow") return "icons/weapons/crossbows/crossbow-simple-brown.webp";
-      if (weaponGroup === "blackpowder") return "icons/weapons/guns/gun-flintlock-brown.webp";
-      if (weaponGroup === "twohanded") return "icons/weapons/swords/greatsword-guard-steel.webp";
-      if (weaponGroup === "polearm") return "icons/weapons/polearms/halberd-crescent-steel.webp";
-      if (weaponGroup === "fencing") return "icons/weapons/swords/sword-guard-bronze-long.webp";
-      if (weaponGroup === "flail") return "icons/weapons/maces/flail-ball-grey.webp";
-      return "icons/weapons/swords/sword-guard-steel.webp";
-
-    case "armour":
-      return "icons/equipment/chest/breastplate-steel-grey.webp";
-
-    case "ammunition":
-      return "icons/weapons/ammunition/arrows-flight-red.webp";
-
-    case "container":
-      return "icons/containers/bags/pack-leather-brown.webp";
-
-    case "money":
-      return "icons/commodities/currency/coins-plain-stack-gold.webp";
-
-    case "trapping":
-      switch (trappingType) {
-        case "foodAndDrink": return "icons/consumables/food/bowl-stew-brown.webp";
-        case "drugsPoisonsHerbsDraughts": return "icons/consumables/potions/potion-flask-corked-green.webp";
-        case "toolsAndKits": return "icons/tools/laboratory/vials-blue.webp";
-        case "booksAndDocuments": return "icons/sundries/books/book-clasp-brown-red.webp";
-        case "clothingAccessories": return "icons/equipment/chest/coat-collared-brown.webp";
-        default: return "icons/sundries/misc/trinkets-colored.webp";
-      }
-
-    default:
-      return "icons/sundries/misc/trinkets-colored.webp";
+    case "weapon":      return "icons/svg/sword.svg";
+    case "armour":      return "icons/svg/shield.svg";
+    case "ammunition":  return "icons/svg/target.svg";
+    case "container":   return "icons/svg/chest.svg";
+    case "money":       return "icons/svg/coins.svg";
+    case "trapping":    return "icons/svg/item-bag.svg";
+    default:            return "icons/svg/item-bag.svg";
   }
 }

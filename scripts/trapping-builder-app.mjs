@@ -18,6 +18,7 @@ import {
   validateRuneAddition,
   ALL_RUNES,
 } from "./dwarven-runes.mjs";
+import { isSourcebookActive } from "./settings.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -142,10 +143,14 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     const isArmour = itemType === "armour";
     const isShield = isWeapon && ["parry", "basic"].includes(this.#parsedData?.system?.weaponGroup?.value)
       && this.#parsedData?.system?.qualities?.value?.some(q => q.name === "shield");
-    const showRandomButtons = isWeapon || isArmour || isShield;
 
-    // Dwarven Runes — show for weapons, armour, and trappings
-    const showRuneButtons = !!this.#parsedData && ["weapon", "armour", "trapping"].includes(itemType);
+    // Gate random enchantment buttons behind Archives of the Empire Vol II module
+    const hasArchivesVol2 = isSourcebookActive("archivesVol2");
+    const showRandomButtons = hasArchivesVol2 && (isWeapon || isArmour || isShield);
+
+    // Gate Dwarven Runes behind Dwarf Player's Guide module
+    const hasDwarfGuide = isSourcebookActive("dwarfPlayersGuide");
+    const showRuneButtons = hasDwarfGuide && !!this.#parsedData && ["weapon", "armour", "trapping"].includes(itemType);
     const totalInscribed = this.#inscribedRunes.reduce((sum, r) => sum + r.count, 0);
     const runesAtMax = totalInscribed >= 3;
     const hasMasterRune = this.#inscribedRunes.some((r) => {
