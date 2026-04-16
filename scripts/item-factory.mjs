@@ -1,5 +1,47 @@
 // ===========================================================================
 // Item Factory – Creates FoundryVTT Item documents from parsed AI data
+//
+// This module is responsible for the final step of item creation: taking
+// the structured JSON data produced by the AI parser (or modified by
+// random tables / rune inscription) and creating actual FoundryVTT Item
+// and ActiveEffect documents.
+//
+// KEY RESPONSIBILITIES:
+//
+// 1. ICON RESOLUTION
+//    Replaces the AI's suggested icon path with a real icon from the
+//    WFRP4e compendium. Falls back to guaranteed Foundry SVG icons to
+//    avoid 404 errors on Forge-hosted instances.
+//
+// 2. MAGICAL QUALITY ENFORCEMENT
+//    Safety net that scans item name/description for magical keywords
+//    and ensures the WFRP4e "magical" quality is present on weapons
+//    and armour. This catches cases where the AI omits it.
+//
+// 3. WORLD ITEM CREATION (createWorldItem)
+//    Creates a standalone Item in the world Items directory. Effects
+//    are created as embedded ActiveEffect documents after the item.
+//
+// 4. ACTOR ITEM CREATION (createActorItem)
+//    Creates an owned Item directly on an Actor's inventory.
+//    For consumables: uses a staging world item to properly serialize
+//    embedded effects, then copies to the actor and deletes the staging item.
+//    This prevents WFRP4e from auto-applying characteristic effects.
+//
+// 5. ACTIVE EFFECT CREATION (_createEffects)
+//    Converts the effect data array into proper FoundryVTT ActiveEffect
+//    documents. Handles two paths:
+//    - CONSUMABLE: transfer=false, transferData.type="other" so WFRP4e
+//      doesn't auto-apply. The wfrp4e-consumables-with-effects module
+//      handles manual application on consume.
+//    - NON-CONSUMABLE: transfer=true, equipTransfer=true so effects
+//      apply when the item is equipped. Passes through scriptData for
+//      WFRP4e trigger scripts (applyDamage, preTakeDamage, dialog, etc.)
+//
+// 6. PREVIEW SUMMARY (buildPreviewSummary)
+//    Builds a template-friendly summary of the item data for the preview
+//    card shown before creation. Extracts effect names, triggers, and
+//    truncated script previews.
 // ===========================================================================
 import { resolveIcon } from "./icon-resolver.mjs";
 

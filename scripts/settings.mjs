@@ -1,5 +1,27 @@
 // ===========================================================================
-// Settings Registration
+// Settings Registration & Sourcebook Detection
+//
+// This file handles two responsibilities:
+//
+// 1. SETTINGS REGISTRATION
+//    Registers the module's configurable settings in FoundryVTT's module
+//    settings panel. These include:
+//    - apiKey: The user's Anthropic API key for Claude AI calls
+//    - model: Which Claude model to use (Sonnet 4 or Haiku 4.5)
+//    - defaultItemType: Default item type suggestion for the AI parser
+//
+// 2. SOURCEBOOK MODULE DETECTION
+//    Determines which WFRP4e sourcebook modules are installed and active
+//    in this Foundry world. The Trapping Builder gates certain features
+//    behind sourcebook ownership:
+//    - Archives of the Empire Vol II (wfrp4e-archives2):
+//        Random magical weapon/armour/shield quality tables
+//    - Dwarf Player's Guide (wfrp4e-dwarfs):
+//        Dwarven Rune inscription system
+//
+//    If a sourcebook module is not active, its corresponding UI section
+//    is hidden — the user can still generate items with the AI, just
+//    without the supplemental random tables or rune features.
 // ===========================================================================
 const MODULE_ID = "wfrp4e-trapping-builder";
 

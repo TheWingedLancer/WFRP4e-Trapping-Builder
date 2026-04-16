@@ -1,10 +1,27 @@
 // ===========================================================================
 // Icon Resolver – Finds the best WFRP4e icon for a generated item
 //
-// Strategy:
-//   1. Search WFRP4e compendium items for a name/type match → use that icon
-//   2. Fall back to a keyword-based lookup against cached compendium icons
-//   3. Last resort: use Foundry's built-in generic icons
+// The AI parser suggests icon paths, but these are often wrong or point to
+// Foundry core webp files that don't exist on Forge-hosted instances (404).
+// This module replaces the AI's icon with one resolved from the actual
+// WFRP4e compendium packs installed in the user's world.
+//
+// RESOLUTION STRATEGY (in priority order):
+//   1. EXACT NAME MATCH: Search all Item compendium packs for an item with
+//      the same name (case-insensitive) and use its icon path.
+//   2. FUZZY NAME MATCH (same type): Split the item name into keywords and
+//      find the compendium item of the same type with the most keyword overlap.
+//      Bonus score for substring containment.
+//   3. FUZZY NAME MATCH (any type): Same keyword matching but across all
+//      item types, in case the item is categorized differently.
+//   4. TYPE-BASED GENERIC: Pick the compendium item with the shortest name
+//      for this type (tends to be the base/generic version).
+//   5. BUILT-IN FALLBACK: Use guaranteed Foundry SVG icons (icons/svg/*.svg)
+//      that exist in every Foundry install including Forge.
+//
+// The icon cache is built once on first use from the compendium index
+// (fast — uses getIndex, not getDocuments) and reused for all subsequent
+// resolutions within the session.
 // ===========================================================================
 
 const MODULE_ID = "wfrp4e-trapping-builder";

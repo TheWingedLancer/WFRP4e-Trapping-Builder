@@ -1,7 +1,33 @@
 /* ==========================================================================
    WFRP4e Universal Trapping Builder – Stylesheet
-   Inherits WFRP4e system theme (warhammer, wfrp4e, classic-font classes).
-   Only defines layout and module-specific styling.
+
+   This stylesheet defines layout and module-specific styling for the
+   Trapping Builder UI. It inherits the WFRP4e system theme through the
+   window classes: sheet, warhammer, wfrp4e, classic-font.
+
+   APPROACH:
+   - All selectors are scoped under .trapping-builder-app to avoid
+     conflicts with other modules or the WFRP4e system CSS
+   - Buttons intentionally do NOT define custom colors — they inherit
+     the default WFRP4e button styling from the system theme
+   - The only custom colors are for:
+     - Section subtitle icons (gold #b8860b)
+     - Roll result left border accents (gold #b8860b)
+     - Roll result badges (dark brown #4a3c28)
+   - The .window-content overflow is set to auto for scrolling when
+     content exceeds the 700px window height
+
+   SECTIONS:
+   1. Sidebar inject button (.trapping-builder-btn)
+   2. Application layout (.trapping-builder-body)
+   3. Input section (textarea, controls)
+   4. Buttons (minimal — inherits WFRP4e defaults)
+   5. Error display
+   6. Preview card (header, icon, stats, description)
+   7. Effects list (script badges, code previews)
+   8. Random roll section (buttons, results, delete)
+   9. Rune controls (dropdown, inscribed runes)
+   10. Actor selection row
    ========================================================================== */
 
 /* ----- Inject button in Items sidebar directory ----- */

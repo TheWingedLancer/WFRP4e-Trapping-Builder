@@ -1,3 +1,33 @@
+{{!--
+  WFRP4e Universal Trapping Builder — Main Template
+  
+  This Handlebars template renders the TrappingBuilderApp window contents.
+  It's divided into several sections that conditionally render based on
+  the application state:
+
+  SECTIONS:
+    1. INPUT SECTION — Textarea for the user's item description + Generate button
+    2. ERROR DISPLAY — Shows API or validation errors
+    3. PREVIEW SECTION — Shows the generated item with:
+       - Editable name field
+       - Item type badge
+       - Description text (HTML)
+       - Weapon details (group, damage, reach) for weapons
+       - Armour details (AP per location, penalty) for armour
+       - Effects list with trigger badges and script/changes previews
+    4. RANDOM ENCHANTMENTS — Archives Vol II d100 roll buttons
+       (gated behind wfrp4e-archives2 module)
+    5. DWARVEN RUNES — Rune picker dropdown with Rule of Three enforcement
+       (gated behind wfrp4e-dwarfs module)
+    6. INSCRIBED RUNES — Display of runes added with delete buttons
+    7. ROLL RESULTS — Display of random quality rolls with delete buttons
+    8. ACTION BUTTONS — Create Item (world) and Add to Actor (with dropdown)
+
+  CONTEXT VARIABLES (from _prepareContext):
+    description, generating, error, preview, actors,
+    showRandomButtons, isWeapon, isArmour, isShield,
+    rollResults, showRuneButtons, availableRunes, runesAtMax, inscribedRunes
+--}}
 <div class="trapping-builder-body">
   {{!-- Input Section --}}
   <section class="tb-input-section">

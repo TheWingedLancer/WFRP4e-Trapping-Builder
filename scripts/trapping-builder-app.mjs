@@ -1,5 +1,37 @@
 // ===========================================================================
 // TrappingBuilderApp – ApplicationV2 + HandlebarsApplicationMixin (V13)
+//
+// The main UI application for the WFRP4e Universal Trapping Builder.
+// This is a FoundryVTT V13 ApplicationV2 window that provides:
+//
+// WORKFLOW:
+//   1. User types a plain-English description of an item they want
+//   2. "Generate Trapping" sends the description to the Claude AI API
+//   3. AI returns structured WFRP4e item data (JSON)
+//   4. Preview card shows the item with stats, qualities, and effects
+//   5. User can optionally:
+//      - Edit the item name before creation
+//      - Roll on random magical quality tables (Archives Vol II)
+//      - Inscribe Dwarven Runes (Dwarf Player's Guide)
+//      - Delete unwanted roll results or runes
+//   6. "Create Item" makes a world item; "Add to Actor" adds to a character
+//
+// ARCHITECTURE:
+//   - Uses ApplicationV2's static action handlers (data-action attributes)
+//   - HandlebarsApplicationMixin for template rendering
+//   - Instance state (#parsedData, #rollResults, #inscribedRunes) persists
+//     across renders until reset or new generation
+//   - Feature sections are gated behind sourcebook module detection
+//     (see settings.mjs → isSourcebookActive)
+//
+// WINDOW CONFIGURATION:
+//   - Classes: sheet warhammer wfrp4e classic-font (inherits WFRP4e theme)
+//   - Tag: form (matches WFRP4e character sheet structure)
+//   - Fixed height 700px with scrollable content
+//   - Resizable by the user
+//
+// TEMPLATE: templates/trapping-builder.hbs
+// STYLES:   styles/trapping-builder.css
 // ===========================================================================
 import { parseTrappingDescription } from "./ai-parser.mjs";
 import {
@@ -202,6 +234,11 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     event.preventDefault();
   }
 
+  /**
+   * Generate a new item from the user's description using the Claude AI API.
+   * Clears all previous state (roll results, inscribed runes) and replaces
+   * parsedData with the AI's response. Shows a loading state while generating.
+   */
   static async #onGenerate(event, target) {
     // Grab text from the textarea
     const textarea = this.element.querySelector("#tb-description");
@@ -232,6 +269,7 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     }
   }
 
+  /** Reset all state to initial values, clearing the preview, rolls, and runes. */
   static #onReset(event, target) {
     this.#description = "";
     this.#parsedData = null;
@@ -242,6 +280,12 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.render();
   }
 
+  /**
+   * Create the item as a world-level Item in the Items directory.
+   * Applies any name override from the editable name field, then
+   * delegates to the item factory which handles icon resolution,
+   * magical quality enforcement, and ActiveEffect creation.
+   */
   static async #onCreateWorld(event, target) {
     if (!this.#parsedData) return;
     this.#applyNameOverride();
@@ -259,6 +303,12 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     }
   }
 
+  /**
+   * Create the item directly on a selected Actor's inventory.
+   * Reads the actor from the dropdown selector. For consumables,
+   * the item factory uses a staging world item to properly serialize
+   * embedded effects before copying to the actor.
+   */
   static async #onCreateActor(event, target) {
     if (!this.#parsedData) return;
     this.#applyNameOverride();
@@ -292,6 +342,12 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
   // Random Table Rolls
   // -----------------------------------------------------------------------
 
+  /**
+   * Roll on the Magical Weapon Qualities d100 table (Archives Vol II p58-60).
+   * Adds the "magical" quality, any rolled qualities, and creates an
+   * ActiveEffect from the effectData if the result has mechanical effects.
+   * "Legendary Weapon" results automatically reroll twice.
+   */
   static #onRollWeaponMagic(event, target) {
     if (!this.#parsedData) return;
     const results = rollMagicalWeaponQuality();
@@ -321,6 +377,12 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.render();
   }
 
+  /**
+   * Roll on the Magical Armour Qualities d100 table (Archives Vol II p63).
+   * Handles special material results (Gromril/Ithilmar) that upgrade the
+   * armour's AP values, add material qualities, and reduce encumbrance.
+   * "Legendary Armour" results automatically reroll twice.
+   */
   static #onRollArmourMagic(event, target) {
     if (!this.#parsedData) return;
     const results = rollMagicalArmourQuality();
@@ -368,6 +430,10 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.render();
   }
 
+  /**
+   * Roll on the Magical Shield Qualities d100 table (Archives Vol II p64).
+   * Similar to weapon/armour rolls but returns a single result (no reroll mechanic).
+   */
   static #onRollShieldMagic(event, target) {
     if (!this.#parsedData) return;
     const result = rollMagicalShieldQuality();
@@ -391,6 +457,12 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.render();
   }
 
+  /**
+   * Roll a random armour piece (d100, Archives Vol II p62) and armour size (d10).
+   * Determines the piece type (mail coat, plate helm, etc.), material, coverage
+   * locations, AP values, penalties, and original wearer species/height.
+   * Overwrites the current item's armour data with the rolled result.
+   */
   static #onRollArmourSize(event, target) {
     if (!this.#parsedData) return;
     const result = rollRandomArmour();
@@ -465,6 +537,11 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.render();
   }
 
+  /**
+   * Delete a specific roll result by its index in the rollResults array.
+   * Also removes the corresponding ActiveEffect, qualities, and description
+   * text that were added when the roll was made.
+   */
   static #onDeleteRollResult(event, target) {
     const index = parseInt(target.dataset.index, 10);
     if (isNaN(index) || index < 0 || index >= this.#rollResults.length) return;
@@ -502,6 +579,15 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
   // Dwarven Rune Actions
   // -----------------------------------------------------------------------
 
+  /**
+   * Inscribe a Dwarven Rune onto the item (Dwarf Player's Guide p123-130).
+   * Reads the selected rune from the dropdown, validates against the Rules
+   * of Runes (Rule of Three, Rule of Jealousy, max count per rune), then:
+   * - Adds the "magical" quality (all runic items are magical)
+   * - Adds any weapon/armour qualities the rune grants
+   * - Creates a scaled ActiveEffect (per-rune effects multiply with count)
+   * - Appends the rune description to the item description
+   */
   static #onAddRune(event, target) {
     if (!this.#parsedData) return;
 
@@ -569,6 +655,11 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.render();
   }
 
+  /**
+   * Remove an inscribed rune from the item. Removes the rune entry,
+   * its corresponding ActiveEffect, and the description text it appended.
+   * Uses a regex pattern to match the rune name in bold within <p> tags.
+   */
   static #onDeleteRune(event, target) {
     const runeName = target.dataset.runeName;
     if (!runeName) return;
@@ -680,8 +771,16 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Standalone Helper Functions
+// These are module-level (not class members) because they don't need
+// access to instance state — they're pure data formatting utilities.
 // ---------------------------------------------------------------------------
+
+/**
+ * Format the WFRP4e armour locations object into a human-readable string.
+ * @param {object} locations - {head: bool, body: bool, lArm: bool, ...}
+ * @returns {string} e.g. "Head, Body, L.Arm, R.Arm"
+ */
 function _formatLocations(locations) {
   if (!locations) return "None";
   const names = [];
@@ -694,6 +793,12 @@ function _formatLocations(locations) {
   return names.length ? names.join(", ") : "None";
 }
 
+/**
+ * Format the WFRP4e armour AP object into a human-readable string.
+ * Filters out locations with 0 AP and displays "Label: N" for each.
+ * @param {object} ap - {head: int, body: int, lArm: int, rArm: int, lLeg: int, rLeg: int}
+ * @returns {string} e.g. "Head: 2, Body: 2, L.Arm: 2, R.Arm: 2"
+ */
 function _formatAP(ap) {
   if (!ap) return "0";
   const parts = [];

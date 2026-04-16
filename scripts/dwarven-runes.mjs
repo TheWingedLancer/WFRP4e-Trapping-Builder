@@ -304,10 +304,25 @@ export function getRunesForItemType(itemType) {
 }
 
 /**
- * Validate rune selection against the Rules of Runes.
+ * Validate whether a rune can be added to an item, enforcing the
+ * Rules of the Runes from the Dwarf Player's Guide (p123-124):
+ *
+ * - RULE OF THREE (p123): No runic item can bear more than 3 runes total.
+ *   Multiple instances of the same rune each count separately toward this limit.
+ *
+ * - RULE OF JEALOUSY (p124): A runic item may not bear more than one master rune.
+ *   If more than one version of the same master rune appears within 100 yards,
+ *   only the oldest functions (but that's a runtime check, not enforced here).
+ *
+ * - MAX COUNT PER RUNE: Each rune type has a maximum number of times it can
+ *   appear on a single item (usually 3, master runes = 1).
+ *
+ * NOTE: The Rule of Pride (p124) — identical runic items within 100 yards
+ * deactivate — is a runtime/world rule that can't be enforced at creation time.
+ *
  * @param {Array<{name: string, count: number}>} selectedRunes - runes already on the item
- * @param {object} newRune - rune to add
- * @returns {{valid: boolean, reason?: string}}
+ * @param {object} newRune - rune definition to validate adding
+ * @returns {{valid: boolean, reason?: string}} validation result
  */
 export function validateRuneAddition(selectedRunes, newRune) {
   // Rule of Three: max 3 runes total per item

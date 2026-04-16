@@ -1,5 +1,35 @@
 // ===========================================================================
 // AI Parser – Calls Claude API to convert plain English → WFRP4e item data
+//
+// This module is the AI-powered core of the Trapping Builder. It takes a
+// plain-English description from the user (e.g., "a magical greatsword that
+// adds +5 to Melee tests") and calls the Anthropic Claude API to generate
+// a complete WFRP4e item data structure.
+//
+// HOW IT WORKS:
+//   1. The user's description is sent to the Claude API as a user message
+//   2. A comprehensive system prompt teaches the AI about:
+//      - The WFRP4e item JSON schema (type, system, effects)
+//      - Weapon damage formulas ("SB+X" strings, not integers)
+//      - Canonical weapon/armour stats from the WFRP4e compendium
+//      - The WFRP4e Active Effect system (changes, scriptData, triggers)
+//      - Consumable compatibility with wfrp4e-consumables-with-effects
+//      - Armour AP per-location format ({head:2, body:2, ...})
+//   3. The AI returns raw JSON which is parsed and validated
+//   4. The parsed data is returned to the TrappingBuilderApp for preview
+//
+// CONFIGURATION:
+//   - API key: stored in module settings (settings.mjs → apiKey)
+//   - Model: selectable in settings (Sonnet 4 or Haiku 4.5)
+//   - The API call goes directly to api.anthropic.com from the browser
+//
+// IMPORTANT NOTES:
+//   - The system prompt is very large (~700 lines) because it contains
+//     all the canonical WFRP4e weapon/armour/trapping data needed for
+//     the AI to generate accurate items
+//   - The AI's icon suggestion is always overridden by icon-resolver.mjs
+//   - Consumable effects use transfer:false with transferData.type:"other"
+//     to prevent auto-application (the consumables module handles this)
 // ===========================================================================
 const MODULE_ID = "wfrp4e-trapping-builder";
 
@@ -665,8 +695,27 @@ Choose an appropriate icon path from FoundryVTT defaults:
 10. If the user description is ambiguous, make reasonable WFRP4e-accurate assumptions and note them in the item description`;
 
 // ---------------------------------------------------------------------------
-// Main parser function
+// Main parser function — the only export from this module
 // ---------------------------------------------------------------------------
+
+/**
+ * Send a plain-English item description to the Claude AI API and parse
+ * the response into structured WFRP4e item data.
+ *
+ * @param {string} description - User's plain-English description of the item
+ * @returns {Promise<object>} Parsed item data ready for the item factory
+ * @throws {Error} If API key is missing, API call fails, or response is invalid JSON
+ *
+ * The returned object follows the WFRP4e item schema:
+ *   {
+ *     name: "Item Name",
+ *     type: "weapon"|"armour"|"trapping"|"ammunition"|"container"|"money",
+ *     img: "icons/...",  (overridden later by icon-resolver.mjs)
+ *     system: { ... },   (type-specific data: damage, AP, qualities, etc.)
+ *     effects: [ ... ],  (ActiveEffect definitions with changes/scriptData)
+ *     flags: { ... },    (module flags, e.g. consumable metadata)
+ *   }
+ */
 export async function parseTrappingDescription(description) {
   const apiKey = game.settings.get(MODULE_ID, "apiKey");
   if (!apiKey) {

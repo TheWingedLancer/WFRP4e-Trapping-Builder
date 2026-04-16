@@ -2,17 +2,44 @@
 // Random Tables – Magical Weapon & Armour Qualities + Armour Size
 // From Archives of the Empire Vol II (canonical d100 ranges from the PDF)
 //
-// Each entry includes:
-//   - range: d100 range
-//   - name: enchantment name
-//   - description: flavour text
-//   - qualities: weapon/armour qualities to add [{name, value?}]
+// This module contains the complete d100 random tables for generating
+// magical item properties as described in the Archives of the Empire
+// Vol II sourcebook (pages 55-64). These tables are used when the user
+// clicks the "Roll Magical Quality" buttons in the Trapping Builder UI.
+//
+// TABLE STRUCTURE:
+// Each table is an array of entries with:
+//   - range: [min, max] — inclusive d100 range for this result
+//   - name: canonical enchantment name from the sourcebook
+//   - description: rules text describing the enchantment's effect
+//   - qualities: WFRP4e weapon/armour qualities to add [{name, value?}]
 //   - effectData: WFRP4e Active Effect data to create on the item
-//     - changes: Foundry changes array for simple stat mods
+//     - changes: Foundry changes array for simple stat modifiers
+//       (e.g., +10 Initiative via system.characteristics.i.modifier)
 //     - scriptData: WFRP4e script triggers for complex behavior
+//       (e.g., applyDamage scripts that add conditions on hit)
+//     - null: effect is too complex for automation (GM-adjudicated)
+//   - reroll: number of additional rolls for "Legendary" results
+//   - material: "gromril" or "ithilmar" for material-upgrade results
+//
+// TABLES INCLUDED:
+//   MAGICAL_WEAPON_TABLE  — 27 entries (p58-60), d100 01-100
+//   MAGICAL_ARMOUR_TABLE  — 11 entries (p63), d100 01-100
+//   MAGICAL_SHIELD_TABLE  — 6 entries (p64), d100 01-100
+//   ARMOUR_PIECE_TABLE    — 18 entries (p62), d100 01-100
+//   ARMOUR_SIZE_TABLE     — 10 entries (p62), d10 1-10
+//
+// EXPORTED FUNCTIONS:
+//   rollMagicalWeaponQuality() → Array of results (handles Legendary rerolls)
+//   rollMagicalArmourQuality() → Array of results (handles Legendary rerolls)
+//   rollMagicalShieldQuality() → Single result object
+//   rollRandomArmour()         → Piece + species/height result
 // ===========================================================================
 
+/** Roll a d100 (1-100) */
 function d100() { return Math.floor(Math.random() * 100) + 1; }
+
+/** Roll a dN (1-N) */
 function dN(n) { return Math.floor(Math.random() * n) + 1; }
 
 // ---------------------------------------------------------------------------

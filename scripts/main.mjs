@@ -1,5 +1,19 @@
 // ===========================================================================
 // WFRP4e Universal Trapping Builder - Main Entry Point
+//
+// This is the module's entry point, loaded by FoundryVTT when the module
+// is active (referenced in module.json as an esmodule).
+//
+// RESPONSIBILITIES:
+//   1. Register module settings on the "init" hook (API key, model, defaults)
+//   2. Inject a "Create Trapping (AI)" button into the Items Directory
+//      sidebar tab on the "renderItemDirectory" hook
+//   3. When clicked, open the TrappingBuilderApp window
+//
+// The sidebar button is placed alongside Foundry's native "Create Item"
+// and "Create Folder" buttons. The injection handles multiple possible
+// DOM structures across FoundryVTT versions (V13 uses .header-actions,
+// earlier versions use .action-buttons or .directory-header).
 // ===========================================================================
 import { TrappingBuilderApp } from "./trapping-builder-app.mjs";
 import { registerSettings } from "./settings.mjs";
