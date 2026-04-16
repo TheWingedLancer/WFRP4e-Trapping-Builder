@@ -21,12 +21,17 @@
 }
 
 /* ----- Application layout ----- */
+
+/* ApplicationV2 window content must scroll */
+.trapping-builder-app .window-content {
+  overflow-y: auto;
+}
+
 .trapping-builder-app .trapping-builder-body {
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding: 10px;
-  overflow-y: auto;
 }
 
 /* ----- Input Section ----- */

@@ -2,7 +2,7 @@
   "id": "wfrp4e-trapping-builder",
   "title": "WFRP4e Universal Trapping Builder",
   "description": "AI-powered trapping builder for WFRP4e. Describe any item in plain English and generate fully functional trappings with effects — consumables, equipment, enchanted gear, weapons, armour, and more.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
