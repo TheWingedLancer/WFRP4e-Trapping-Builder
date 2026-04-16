@@ -39,7 +39,7 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     },
     position: {
       width: 560,
-      height: "auto",
+      height: 700,
     },
     form: {
       handler: TrappingBuilderApp.#onFormSubmit,

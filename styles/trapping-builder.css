@@ -26,6 +26,7 @@
   flex-direction: column;
   gap: 14px;
   padding: 10px;
+  overflow-y: auto;
 }
 
 /* ----- Input Section ----- */
