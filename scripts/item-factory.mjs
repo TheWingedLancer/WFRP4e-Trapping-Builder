@@ -64,7 +64,6 @@ export async function createWorldItem(itemData) {
   _ensureMagicalQuality(itemData);
   const consumable = _isConsumable(itemData);
   const { effects, ...coreData } = itemData;
-  console.log("Trapping Builder | createWorldItem effects:", effects?.length ?? 0, effects);
   const item = await Item.create(coreData);
 
   if (effects?.length) {
@@ -175,14 +174,7 @@ async function _createEffects(item, effectsData, isConsumable) {
     return effectObj;
   });
 
-  console.log("Trapping Builder | _createEffects called with", effectDocs.length, "effects:", JSON.stringify(effectDocs, null, 2));
-
-  try {
-    const created = await item.createEmbeddedDocuments("ActiveEffect", effectDocs);
-    console.log("Trapping Builder | ActiveEffects created:", created?.length, created);
-  } catch (err) {
-    console.error("Trapping Builder | Failed to create ActiveEffects:", err);
-  }
+  await item.createEmbeddedDocuments("ActiveEffect", effectDocs);
 }
 
 /**

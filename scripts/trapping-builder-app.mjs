@@ -13,6 +13,11 @@ import {
   rollMagicalShieldQuality,
   rollRandomArmour,
 } from "./random-tables.mjs";
+import {
+  getRunesForItemType,
+  validateRuneAddition,
+  ALL_RUNES,
+} from "./dwarven-runes.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -51,6 +56,8 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
       rollArmourSize: TrappingBuilderApp.#onRollArmourSize,
       rollShieldMagic: TrappingBuilderApp.#onRollShieldMagic,
       deleteRollResult: TrappingBuilderApp.#onDeleteRollResult,
+      addRune: TrappingBuilderApp.#onAddRune,
+      deleteRune: TrappingBuilderApp.#onDeleteRune,
     },
   };
 
@@ -82,6 +89,9 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
 
   /** @type {Array} Results from random table rolls */
   #rollResults = [];
+
+  /** @type {Array<{name: string, count: number}>} Runes inscribed on the item */
+  #inscribedRunes = [];
 
   constructor(options = {}) {
     super(options);
@@ -134,6 +144,32 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
       && this.#parsedData?.system?.qualities?.value?.some(q => q.name === "shield");
     const showRandomButtons = isWeapon || isArmour || isShield;
 
+    // Dwarven Runes — show for weapons, armour, and trappings
+    const showRuneButtons = !!this.#parsedData && ["weapon", "armour", "trapping"].includes(itemType);
+    const totalInscribed = this.#inscribedRunes.reduce((sum, r) => sum + r.count, 0);
+    const runesAtMax = totalInscribed >= 3;
+    const hasMasterRune = this.#inscribedRunes.some((r) => {
+      const rd = ALL_RUNES.find((d) => d.name === r.name);
+      return rd?.isMaster;
+    });
+
+    // Build available runes list with disabled state
+    const runePool = showRuneButtons ? getRunesForItemType(itemType) : [];
+    const availableRunes = runePool.map((rune) => {
+      const validation = validateRuneAddition(this.#inscribedRunes, rune);
+      return {
+        ...rune,
+        disabled: !validation.valid,
+        disabledReason: validation.reason ?? "",
+      };
+    });
+
+    // Build inscribed runes display list
+    const inscribedRunes = this.#inscribedRunes.map((r) => {
+      const rd = ALL_RUNES.find((d) => d.name === r.name);
+      return { name: r.name, count: r.count, isMaster: rd?.isMaster ?? false, description: rd?.description ?? "" };
+    });
+
     return {
       description: this.#description,
       generating: this.#generating,
@@ -145,6 +181,10 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
       isArmour,
       isShield,
       rollResults: this.#rollResults,
+      showRuneButtons,
+      availableRunes,
+      runesAtMax,
+      inscribedRunes,
     };
   }
 
@@ -172,6 +212,7 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.#generating = true;
     this.#parsedData = null;
     this.#rollResults = [];
+    this.#inscribedRunes = [];
     this.render();
 
     try {
@@ -192,6 +233,7 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     this.#error = null;
     this.#generating = false;
     this.#rollResults = [];
+    this.#inscribedRunes = [];
     this.render();
   }
 
@@ -452,6 +494,104 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
   }
 
   // -----------------------------------------------------------------------
+  // Dwarven Rune Actions
+  // -----------------------------------------------------------------------
+
+  static #onAddRune(event, target) {
+    if (!this.#parsedData) return;
+
+    const select = this.element.querySelector("#tb-rune-select");
+    const runeName = select?.value;
+    if (!runeName) return;
+
+    // Find the rune data
+    const runeData = ALL_RUNES.find((r) => r.name === runeName);
+    if (!runeData) return;
+
+    // Validate
+    const validation = validateRuneAddition(this.#inscribedRunes, runeData);
+    if (!validation.valid) {
+      ui.notifications.warn(validation.reason);
+      return;
+    }
+
+    // Add or increment the rune count
+    const existing = this.#inscribedRunes.find((r) => r.name === runeName);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      this.#inscribedRunes.push({ name: runeName, count: 1 });
+    }
+
+    // Determine the current count for this rune (for scaling per-rune effects)
+    const currentCount = existing ? existing.count : 1;
+
+    // Ensure "magical" quality on the item (all runic items are magical)
+    this.#ensureQuality("magical");
+
+    // Add any weapon qualities from the rune
+    if (runeData.qualities) {
+      for (const q of runeData.qualities) {
+        this.#ensureQuality(q.name, q.value);
+      }
+    }
+
+    // Create Active Effect from effectData if present
+    if (runeData.effectData) {
+      // For per-rune effects, scale the changes by count
+      let effectData = runeData.effectData;
+      if (effectData.perRune && effectData.changes && currentCount > 1) {
+        // Remove previous effect for this rune and create a scaled one
+        if (this.#parsedData.effects) {
+          const prevIdx = this.#parsedData.effects.findIndex((e) => e.name === runeName);
+          if (prevIdx >= 0) this.#parsedData.effects.splice(prevIdx, 1);
+        }
+        effectData = {
+          ...effectData,
+          changes: effectData.changes.map((c) => ({
+            ...c,
+            value: String(parseInt(c.value) * currentCount),
+          })),
+        };
+      }
+      this.#addEffectFromRollData(runeName, effectData);
+    }
+
+    // Append description
+    const countLabel = currentCount > 1 ? ` (×${currentCount})` : "";
+    this.#appendDescription(`<p><strong>${runeName}${countLabel}:</strong> ${runeData.description}</p>`);
+
+    this.render();
+  }
+
+  static #onDeleteRune(event, target) {
+    const runeName = target.dataset.runeName;
+    if (!runeName) return;
+
+    const idx = this.#inscribedRunes.findIndex((r) => r.name === runeName);
+    if (idx < 0) return;
+
+    // Remove the rune entry entirely
+    this.#inscribedRunes.splice(idx, 1);
+
+    // Remove matching effect
+    if (this.#parsedData?.effects) {
+      const effIdx = this.#parsedData.effects.findIndex((e) => e.name === runeName);
+      if (effIdx >= 0) this.#parsedData.effects.splice(effIdx, 1);
+    }
+
+    // Remove description text (best effort — matches the bold pattern)
+    if (this.#parsedData?.system?.description?.value) {
+      const desc = this.#parsedData.system.description.value;
+      // Remove any paragraph that starts with the rune name in bold
+      const pattern = new RegExp(`<p><strong>${runeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^<]*:</strong>[^<]*</p>`, 'g');
+      this.#parsedData.system.description.value = desc.replace(pattern, "");
+    }
+
+    this.render();
+  }
+
+  // -----------------------------------------------------------------------
   // Helpers
   // -----------------------------------------------------------------------
 
@@ -531,8 +671,6 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
     }
 
     this.#parsedData.effects.push(effect);
-    console.log("Trapping Builder | Added effect from roll:", effectName, effect);
-    console.log("Trapping Builder | Total effects on item:", this.#parsedData.effects.length);
   }
 }
 

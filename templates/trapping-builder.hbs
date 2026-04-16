@@ -135,6 +135,47 @@
     </div>
     {{/if}}
 
+    {{!-- Dwarven Runes — contextual by item type --}}
+    {{#if showRuneButtons}}
+    <div class="tb-random-section">
+      <h5 class="tb-section-subtitle"><i class="fas fa-hammer"></i> Dwarven Runes (Dwarf Player's Guide)</h5>
+      <div class="tb-rune-controls">
+        <select id="tb-rune-select" class="tb-rune-select">
+          {{#each availableRunes}}
+          <option value="{{this.name}}" {{#if this.disabled}}disabled{{/if}}>
+            {{this.name}}{{#if this.isMaster}} ★{{/if}} (SL {{this.slsRequired}}){{#if this.disabled}} — {{this.disabledReason}}{{/if}}
+          </option>
+          {{/each}}
+        </select>
+        <button type="button" class="tb-btn" data-action="addRune" {{#if runesAtMax}}disabled{{/if}}>
+          <i class="fas fa-hammer"></i> Inscribe Rune
+        </button>
+      </div>
+      {{#if runesAtMax}}
+      <p class="tb-rune-warning"><i class="fas fa-exclamation-triangle"></i> Rule of Three: This item already bears 3 runes.</p>
+      {{/if}}
+    </div>
+    {{/if}}
+
+    {{!-- Inscribed Runes --}}
+    {{#if inscribedRunes.length}}
+    <div class="tb-roll-results">
+      <h5 class="tb-section-subtitle"><i class="fas fa-hammer"></i> Inscribed Runes</h5>
+      {{#each inscribedRunes}}
+      <div class="tb-roll-result">
+        <div class="tb-roll-header">
+          <span class="tb-badge tb-badge-roll">{{#if this.isMaster}}★ Master{{else}}×{{this.count}}{{/if}}</span>
+          <strong>{{this.name}}</strong>
+          <button type="button" class="tb-btn-delete-roll" data-action="deleteRune" data-rune-name="{{this.name}}" title="Remove this rune">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <p class="tb-roll-description">{{this.description}}</p>
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+
     {{!-- Roll results --}}
     {{#if rollResults.length}}
     <div class="tb-roll-results">
