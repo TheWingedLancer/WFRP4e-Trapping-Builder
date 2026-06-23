@@ -35,6 +35,10 @@ Hooks.once("ready", () => {
 // ---------------------------------------------------------------------------
 // Inject "Create Trapping (AI)" button into the Items Directory sidebar tab.
 // This sits alongside the existing "Create Item" and "Create Folder" buttons.
+//
+// V14: Sidebar tabs are ApplicationV2-based. The hook signature is
+//       renderItemDirectory(app, element, data) where element is an HTMLElement.
+// V13: Similar pattern — element can be HTMLElement or jQuery-wrapped.
 // ---------------------------------------------------------------------------
 Hooks.on("renderItemDirectory", (app, html, data) => {
   _injectSidebarButton(html);
@@ -43,18 +47,25 @@ Hooks.on("renderItemDirectory", (app, html, data) => {
 /**
  * Inject the "Create Trapping (AI)" button into the Items sidebar directory
  * header action buttons area, next to "Create Item" and "Create Folder".
+ *
+ * Handles multiple possible DOM structures:
+ * - V14: .header-actions within the ApplicationV2 sidebar tab
+ * - V13: .header-actions or .action-buttons
+ * - Older/fallback: .directory-header or .directory-footer
  */
 function _injectSidebarButton(html) {
-  const root = html instanceof HTMLElement ? html : html[0];
+  // Normalize: V14 passes HTMLElement, V13 may pass HTMLElement or jQuery
+  const root = html instanceof HTMLElement ? html : html[0] ?? html;
   if (!root) return;
 
   // Don't double-inject
   if (root.querySelector(".trapping-builder-btn")) return;
 
-  // V13 sidebar directories use .header-actions or .action-buttons for the
-  // button row containing "Create Item", "Create Folder", etc.
+  // V14 sidebar directories may use different selectors for the button area.
+  // Try multiple selectors in order of priority to find the best injection point.
   const actionBar =
     root.querySelector(".header-actions") ??
+    root.querySelector(".header-controls") ??
     root.querySelector(".action-buttons") ??
     root.querySelector(".directory-header .header-control") ??
     root.querySelector(".directory-header");
@@ -85,7 +96,7 @@ function _createButton() {
   btn.addEventListener("click", (ev) => {
     ev.preventDefault();
     ev.stopPropagation();
-    new TrappingBuilderApp().render(true);
+    new TrappingBuilderApp().render({force: true});
   });
 
   return btn;

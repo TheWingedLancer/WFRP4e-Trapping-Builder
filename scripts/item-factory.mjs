@@ -175,7 +175,7 @@ async function _createEffects(item, effectsData, isConsumable) {
   const effectDocs = effectsData.map((efData) => {
     const effectObj = {
       name: efData.name ?? "Effect",
-      icon: itemIcon,
+      img: itemIcon,
       transfer: isConsumable ? false : (efData.transfer ?? true),
       disabled: efData.disabled ?? false,
     };

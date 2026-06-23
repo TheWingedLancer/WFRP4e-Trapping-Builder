@@ -296,7 +296,7 @@ export class TrappingBuilderApp extends HandlebarsApplicationMixin(
         `${game.i18n.localize("TRAPPING_BUILDER.Success")} Created "${item.name}" in Items directory.`
       );
       // Open the created item's sheet
-      item.sheet.render(true);
+      item.sheet.render({force: true});
     } catch (err) {
       console.error("Trapping Builder | Creation failed:", err);
       ui.notifications.error(`Failed to create item: ${err.message}`);
