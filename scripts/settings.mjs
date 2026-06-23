@@ -42,10 +42,11 @@ export function registerSettings() {
     scope: "world",
     config: true,
     type: String,
-    default: "claude-sonnet-4-20250514",
+    default: "claude-sonnet-4-6",
     choices: {
-      "claude-sonnet-4-20250514": "Claude Sonnet 4",
-      "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
+      "claude-sonnet-4-6": "Claude Sonnet 4.6 (Recommended)",
+      "claude-haiku-4-5-20251001": "Claude Haiku 4.5 (Fast/Budget)",
+      "claude-opus-4-8": "Claude Opus 4.8 (Most Capable)",
     },
     requiresReload: false,
   });
